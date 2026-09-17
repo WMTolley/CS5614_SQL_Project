@@ -1,4 +1,4 @@
-# SQL Python Dev Container Info (By WMTOLLEY) :
+# CS5614 SQL Python Dev Container Info :
 
 
 ## To Start Project:
@@ -7,7 +7,7 @@
 1. If you don't already have DockerDesktop, download it to your computer. (https://docs.docker.com/desktop/)
 1. Open DockerDesktop
 1. Open VSCode and click "File" -> "Open Folder" and select the folder you want as your project's parent.
-1. Run: `git clone https://github.com/WMTolley/SQL_Container_Example.git`
+1. Run: `git clone https://github.com/WMTolley/CS5614_SQL_Project.git`
 1. Click "File" -> "Open Folder" and select the created folder.
 1. If using windows immedietely run `git stash` after cloning to reverse WindowOS's changes.
 1. Press: `Ctrl + Shift + P`
