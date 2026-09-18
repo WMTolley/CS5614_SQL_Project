@@ -15,6 +15,7 @@ DB_CONFIG = {
 }
 
 
+# Exampe Function (TODO: Remove Later)
 def add_student_safely(conn, first_name, last_name, email):
     """Adds a student without risk of an injection attack"""
     query = """
@@ -30,6 +31,7 @@ def add_student_safely(conn, first_name, last_name, email):
         return result[0] if result else None
 
 
+# Exampe Function (TODO: Remove Later)
 def remove_student_safely(conn, student_id):
     """Deletes a student by their ID safely"""
     query = """
@@ -68,6 +70,7 @@ def connect_and_init(sql_path):
     raise RuntimeError("ERROR: Database container not reachable.")
 
 
+# Exampe Function (TODO: Remove Later)
 def demonstrate_relationships(conn):
     """Example demonstration"""
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -108,6 +111,7 @@ def demonstrate_relationships(conn):
             )
 
 
+# Exampe Function (TODO: Remove Later)
 def show_students(conn):
     """Display each students name in student table"""
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -120,6 +124,7 @@ def show_students(conn):
             print(f"{s['first_name']} {s['last_name']}")
 
 
+# Exampe Function (TODO: Remove Later)
 def get_studentids_from_firstname_safely(conn, first_name):
     """Retrieves all matching student IDs by their first name safely"""
     query = """
@@ -136,3 +141,53 @@ def get_studentids_from_firstname_safely(conn, first_name):
     except psycopg2.Error as e:
         print(f"ERROR: Database error while looking up student IDs: {e}")
         return []
+
+
+def show_items(conn):
+    """Display each items name in item table"""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        print("\n--- Items ---")
+        cur.execute("""
+            SELECT s.item_id, s.name
+            FROM item s
+        """)
+        for s in cur.fetchall():
+            print(f"{s['item_id']}: {s['name']}")
+
+
+def show_items_with_category(conn):
+    """Display each item's id and name along with its category name"""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        print("\n--- Items with Categories ---")
+        cur.execute("""
+            SELECT 
+                i.item_id, 
+                i.name, 
+                c.name AS category_name
+            FROM item i
+            LEFT JOIN itemCategory c ON i.category_id = c.category_id;
+        """)
+        for row in cur.fetchall():
+            category = row["category_name"] if row["category_name"] else "No Category"
+            print(f"ID {row['item_id']} | Name: {row['name']} | Category: {category}")
+
+
+def modify_items_categoryID_safely(conn, itemID, categoryID):
+    """Modify the item with the specified itemID categoryID value"""
+    query = """
+        UPDATE item 
+        SET category_id = %s 
+        WHERE item_id = %s
+        RETURNING name;
+    """
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query, (categoryID, itemID))
+            result = cur.fetchone()
+            conn.commit()
+            return result[0] if result else None
+
+    except Exception as e:
+        conn.rollback()
+        print(f"ERROR: Database error: {e}")
+        return None

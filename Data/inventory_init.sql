@@ -1,0 +1,141 @@
+-- Clears Database
+DROP TABLE IF EXISTS itemCategory CASCADE;
+DROP TABLE IF EXISTS item CASCADE;
+DROP TABLE IF EXISTS customerTransaction CASCADE;
+DROP TABLE IF EXISTS customerReturn CASCADE;
+DROP TABLE IF EXISTS supplier CASCADE;
+DROP TABLE IF EXISTS customer CASCADE;
+DROP TABLE IF EXISTS supply CASCADE;
+DROP TABLE IF EXISTS statusChange CASCADE;
+DROP TABLE IF EXISTS warehouseTransfer CASCADE;
+DROP TABLE IF EXISTS warehouse CASCADE;
+DROP TABLE IF EXISTS employee CASCADE;
+DROP TABLE IF EXISTS management CASCADE;
+DROP TABLE IF EXISTS inventoryManager CASCADE;
+DROP TABLE IF EXISTS warehouseStaff CASCADE;
+DROP TABLE IF EXISTS supervisor CASCADE;
+
+
+-- Code Identical to Data/inventory_run.sql
+CREATE TABLE IF NOT EXISTS warehouse (
+    warehouse_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    location VARCHAR(50) NOT NULL,
+    is_public boolean NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS itemCategory (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS supplier (
+    supplier_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    contact_info VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS customer (
+    customer_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    contact_info VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS employee (
+    employee_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    contact_info VARCHAR(255) NOT NULL UNIQUE,
+    hire_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    final_date TIMESTAMP,
+    home_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL,
+    supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS item (
+    item_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    serial_number VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
+    markup_price NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
+    category_id INT REFERENCES itemCategory(category_id) ON DELETE SET NULL,
+    warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS customerTransaction (
+    transaction_id SERIAL PRIMARY KEY,
+    transaction_type VARCHAR(50) NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
+    customer_id INT REFERENCES customer(customer_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS customerReturn (
+    return_id SERIAL PRIMARY KEY,
+    return_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    condition VARCHAR(50) NOT NULL,
+    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE,
+    item_id INT REFERENCES item(item_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS supply (
+    supply_id SERIAL PRIMARY KEY,
+    item_id INT REFERENCES item(item_id) ON DELETE SET NULL,
+    supplier_id INT REFERENCES supplier(supplier_id) ON DELETE SET NULL,
+    purchase_cost NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
+    date_supplied TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS statusChange (
+    status_change_id SERIAL PRIMARY KEY,
+    old_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
+    new_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
+    operation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
+    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS warehouseTransfer (
+    transfer_id SERIAL PRIMARY KEY,
+    transfer_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
+    origin_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
+    destination_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS management (
+    management_id SERIAL PRIMARY KEY,
+    supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL,
+    warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS inventoryManager (
+    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS warehouseStaff (
+    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
+    role VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS supervisor (
+    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+);
+
+
+--- SEED DATA ---
+INSERT INTO warehouse (name, location, is_public) VALUES
+('Washington DC Branch', 'White House, Washington DC', true),
+('DisneyLand Storage', 'DisneyLand, Florida', true),
+('SciFi Moon Base', 'Moon', false);
+
+INSERT INTO itemCategory (name) VALUES
+('Electronics'),
+('Office Supplies'),
+('Furniture'),
+('Clothing');
+
+INSERT INTO item (name, serial_number, status, markup_price, category_id, warehouse_id) VALUES
+('Computer', 'DC-ELEC-99281', 'In Stock', 10.99, 1, 1),
+('Stapler', 'DC-OFFI-44120', 'Ordered', 4500.00, 2, 1),
+('Wood Desk', 'DL-FURN-10023', 'Sold', 124.50, 3, 2),
+('50ft Extension Cord', 'DL-ELEC-88371', 'In Stock', 10.30, 1, 2);
