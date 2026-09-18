@@ -189,5 +189,5 @@ def modify_items_categoryID_safely(conn, itemID, categoryID):
 
     except Exception as e:
         conn.rollback()
-        print(f"Database error: {e}")
+        print(f"ERROR: Database error: {e}")
         return None
