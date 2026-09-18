@@ -187,7 +187,7 @@ def modify_items_categoryID_safely(conn, itemID, categoryID):
             conn.commit()
             return result[0] if result else None
 
-    except Exception as e:
+    except psycopg2.Error as e:
         conn.rollback()
         print(f"ERROR: Database error: {e}")
         return None
