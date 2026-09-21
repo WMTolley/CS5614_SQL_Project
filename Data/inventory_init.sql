@@ -126,7 +126,8 @@ CREATE TABLE IF NOT EXISTS supervisor (
 INSERT INTO warehouse (name, location, is_public) VALUES
 ('Washington DC Branch', 'White House, Washington DC', true),
 ('DisneyLand Storage', 'DisneyLand, Florida', true),
-('SciFi Moon Base', 'Moon', false);
+('SciFi Moon Base', 'Moon', false),
+('Rundown Salon', 'Town, Alaska', true);
 
 INSERT INTO itemCategory (name) VALUES
 ('Electronics'),
@@ -136,6 +137,48 @@ INSERT INTO itemCategory (name) VALUES
 
 INSERT INTO item (name, serial_number, status, markup_price, category_id, warehouse_id) VALUES
 ('Computer', 'DC-ELEC-99281', 'In Stock', 10.99, 1, 1),
+('Office Lamp', 'DC-OFFI-99381', 'In Stock', 12.99, 2, 1),
+('Office Lamp', 'DC-OFFI-99382', 'In Stock', 12.98, 2, 1),
 ('Stapler', 'DC-OFFI-44120', 'Ordered', 4500.00, 2, 1),
-('Wood Desk', 'DL-FURN-10023', 'Sold', 124.50, 3, 2),
-('50ft Extension Cord', 'DL-ELEC-88371', 'In Stock', 10.30, 1, 2);
+('Stapler', 'DC-OFFI-44121', 'Ordered', 4400.00, 2, 1),
+('Rubber Stapler', 'DC-OFFI-45120', 'Ordered', 1500.00, 2, 1),
+('Stapler', 'DC-OFFI-44121', 'Ordered', 4400.00, 2, 2),
+('Wood Desk', 'DL-FURN-10023', 'Unavailable', 124.50, 3, 2),
+('Office Lamp', 'DL-OFFI-99385', 'In Stock', 12.98, 2, 2),
+('50ft Extension Cord', 'DL-ELEC-88371', 'In Stock', 10.30, 1, 2),
+('Wood Desk', 'AT-FURN-10023', 'Unavailable', 124.50, 3, 4),
+('Office Lamp', 'AT-OFFI-99385', 'In Stock', 12.98, 2, 4),
+('Office Lamp', 'AT-OFFI-99386', 'Unavailable', 12.98, 2, 4),
+('Office Lamp', 'AT-OFFI-99389', 'In Stock', 12.98, 2, 3),
+('Wooden Chair', 'AT-OFFI-97286', 'Reserved', 12.98, 3, 4),
+('Wooden Chair', 'AT-OFFI-97286', 'Reserved', 12.98, 3, 4),
+('Metal Chair', 'AT-OFFI-97386', 'Unavailable', 12.98, 2, 4),
+('Metal Chair', 'AT-OFFI-97387', 'Reserved', 12.98, 2, 4),
+('50ft Extension Cord', 'AT-ELEC-88372', 'In Stock', 10.30, 1, 4),
+('Wireless Mouse', 'DC-ELEC-99284', 'In Stock', 10.99, 1, 1);
+
+INSERT INTO supplier (name, contact_info) VALUES
+('Ali''s General Store', 'ali@vt.edu'),
+('Emily''s Broad Store', 'emily@vt.edu');
+
+INSERT INTO supply (item_id, supplier_id, purchase_cost, date_supplied) VALUES
+(2, 1, 1.000, '2025-09-18 16:39:45'),
+(3, 2, 1.000, '2024-09-18 16:39:45'),
+(4, 1, 1.000, '2023-09-18 16:39:45'),
+(5, 2, 1.000, '2022-09-18 16:39:45'),
+(6, 1, 1.000, '2021-09-18 16:39:45'),
+(7, 2, 1.000, '2020-09-18 16:39:45'),
+(8, 1, 1.000, '2019-09-18 16:39:45'),
+(9, 2, 1.000, '2018-09-18 16:39:45'),
+(10, 1, 1.000, '2017-09-18 16:39:45'),
+(11, 2, 1.000, '2016-09-18 16:39:45'),
+(12, 1, 1.000, '2015-09-18 16:39:45'),
+(13, 2, 1.000, '2014-09-18 16:39:45'),
+(14, 1, 1.000, '2013-09-18 16:39:45'),
+(15, 2, 1.000, '2012-09-18 16:39:45'),
+(16, 1, 1.000, '2011-09-18 16:39:45'),
+(17, 2, 1.000, '2010-09-18 16:39:45'),
+(18, 1, 1.000, '2009-09-18 16:39:45'),
+(1, 2, 1.000, '2026-09-18 16:39:45'),
+(19, 2, 1.000, '2026-09-18 16:39:45'),
+(20, 2, 1.000, '2026-09-18 16:39:45');
