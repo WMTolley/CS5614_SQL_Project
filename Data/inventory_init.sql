@@ -182,3 +182,13 @@ INSERT INTO supply (item_id, supplier_id, purchase_cost, date_supplied) VALUES
 (1, 2, 1.000, '2026-09-18 16:39:45'),
 (19, 2, 1.000, '2026-09-18 16:39:45'),
 (20, 2, 1.000, '2026-09-18 16:39:45');
+
+
+
+
+
+INSERT INTO employee (name, contact_info, hire_date, final_date, home_warehouse_id, supervisor_id) Values
+('Ezra Jedi', 'jedi@gmail.edu', '2026-09-18 16:39:45', NULL, 1, NULL),
+('Five Nazeem', 'inevitable@gmail.edu', '2025-09-18 16:39:45', NULL, 1, 1),
+('Jace One', 'endingdata@gmail.edu', '2024-09-18 16:39:45', NULL, 1, 2),
+('Magic Tree', 'infotree@gmail.edu', '2023-09-18 16:39:45', NULL, 1, 1);
