@@ -58,7 +58,7 @@ def read_available_items_in_warehouse(conn, warehouse_name) -> dict:
 
                 if name not in items:
                     items[name] = []
-                items[name].append(f"({serial})")
+                items[name].append(f"(#{serial})")
 
             if not items:
                 print("No available items in this warehouse.")
@@ -212,13 +212,17 @@ def read_soldout_unordered_items(conn, warehouse_name) -> list:
             cur.execute(query_items, (warehouse_id, warehouse_id, warehouse_id))
             items_rows = cur.fetchall()
 
+            if len(items_rows) <= 0:
+                print("None Found")
+                return []
+
             items = []
 
             for row in items_rows:
                 name = row["name"]
                 time = row["latesttimestamp"]
                 items.append([name, time])
-                print(f"- {name} {time}")
+                print(f"- {name} [{time}]")
 
             return items
 
@@ -257,10 +261,10 @@ def read_supplier_count_of_available_item(conn, item_name) -> dict:
                 supplier = s["name"]
                 if warehouse not in dictionary_result:
                     dictionary_result[warehouse] = []
-                dictionary_result[warehouse].append(f"({supplier})")
-            for s in dictionary_result:
+                dictionary_result[warehouse].append(f"{supplier}")
+            for s, j in dictionary_result.items():
                 print(f"{s}")
-                for k in dictionary_result[s]:
+                for k in j:
                     print(f"- {k}")
             # print(dictionary_result)
             return dictionary_result
@@ -280,7 +284,7 @@ def read_item_stats_given_name_and_warehouse(conn, item_name, warehouse_name) ->
     """
 
     query_items = """
-        SELECT i.serial_number, i.markup_price, k.name as supplier_name
+        SELECT i.serial_number, i.markup_price, k.name as supplier_name, i.item_id
         FROM item i
         LEFT JOIN supply j 
             ON j.item_id = i.item_id
@@ -314,9 +318,10 @@ def read_item_stats_given_name_and_warehouse(conn, item_name, warehouse_name) ->
                 serial = row["serial_number"]
                 price = row["markup_price"]
                 supplier = row["supplier_name"]
+                id = row["item_id"]
 
                 items.append([price, supplier, serial])
-                print(f"- {price} | {supplier} | {serial}")
+                print(f"- ${price} | {supplier} | {serial} (#{id})")
 
             return items
 
@@ -344,7 +349,7 @@ def read_item_stats_given_category_and_warehouse(
     """
 
     query_items = """
-        SELECT i.serial_number, i.markup_price, k.name as supplier_name, i.name as item_name
+        SELECT i.serial_number, i.markup_price, k.name as supplier_name, i.name as item_name, i.item_id
         FROM item i
         LEFT JOIN supply j 
             ON j.item_id = i.item_id
@@ -386,9 +391,10 @@ def read_item_stats_given_category_and_warehouse(
                 serial = row["serial_number"]
                 price = row["markup_price"]
                 supplier = row["supplier_name"]
+                id = row["item_id"]
 
                 items.append([name, price, supplier, serial])
-                print(f"- {name} | {price} | {supplier} | {serial}")
+                print(f"- {name} | ${price} | {supplier} | {serial} ({id})")
 
             return items
 

@@ -17,3 +17,11 @@ if __name__ == "__main__":
     show_items_with_category(connection)
 
     connection.close()
+
+# Statuses:
+# Ordered
+# Delivered
+# In Stock
+# Reserved
+# Unavailable
+# Discarded

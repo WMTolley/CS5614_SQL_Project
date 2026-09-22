@@ -125,6 +125,21 @@ def show_students(conn):
 
 
 # Exampe Function (TODO: Remove Later)
+def show_statusChanges(conn):
+    """Display each status change in statusChange table"""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        print("\n--- StatusChanges ---")
+        cur.execute("""
+            SELECT s.old_status, s.new_status, s.item_id, s.employee_id, s.operation_timestamp
+            FROM statusChange s
+        """)
+        for s in cur.fetchall():
+            print(
+                f"'{s['old_status']}' to '{s['new_status']}' (item #{s['item_id']}) by Employee ID: {s['employee_id']} on [{s['operation_timestamp']}]"
+            )
+
+
+# Exampe Function (TODO: Remove Later)
 def get_studentids_from_firstname_safely(conn, first_name):
     """Retrieves all matching student IDs by their first name safely"""
     query = """
@@ -152,7 +167,7 @@ def show_items(conn):
             FROM item s
         """)
         for s in cur.fetchall():
-            print(f"{s['item_id']}: {s['name']}")
+            print(f"#{s['item_id']}: {s['name']}")
 
 
 def show_items_with_category(conn):

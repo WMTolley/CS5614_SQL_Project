@@ -10,7 +10,16 @@ from sql_project.ReadCommands.customer_read_commands import (
     read_soldout_unordered_items,
     read_supplier_count_of_available_item,
 )
-from sql_project.sql_commands import connect_and_init, show_items
+from sql_project.ReadCommands.staff_read_commands import (
+    read_ordered_items_in_warehouse,
+    read_subordinates_of_employee,
+    read_supervisors_of_employee,
+)
+from sql_project.sql_commands import connect_and_init, show_items, show_statusChanges
+from sql_project.WriteCommands.staff_write_commands import (
+    write_delivered_as_available,
+    write_instock_as_unavailable,
+)
 
 if __name__ == "__main__":
     connection = connect_and_init("Data/inventory_init.sql")
@@ -29,6 +38,41 @@ if __name__ == "__main__":
     read_item_stats_given_category_and_warehouse(
         connection, "Electronics", "Washington DC Branch"
     )
+
+    read_subordinates_of_employee(connection, "1")
+    read_subordinates_of_employee(connection, "2")
+    read_supervisors_of_employee(connection, "4")
+    read_supervisors_of_employee(connection, "1")
+
+    read_available_items_in_warehouse(connection, "Washington DC Branch")
+    read_soldout_unordered_items(connection, "Washington DC Branch")
+    write_instock_as_unavailable(connection, 1, item_id="1")
+    read_available_items_in_warehouse(connection, "Washington DC Branch")
+    read_soldout_unordered_items(connection, "Washington DC Branch")
+    show_statusChanges(connection)
+
+    write_instock_as_unavailable(connection, 1, item_id="1")
+    write_delivered_as_available(connection, 1, item_id="1")
+    show_statusChanges(connection)
+
+    read_ordered_items_in_warehouse(connection, "Washington DC Branch")
+    write_delivered_as_available(connection, 3, item_id="4")
+    show_statusChanges(connection)
+
+    write_delivered_as_available(connection, 1, item_id="4")
+    show_statusChanges(connection)
+    read_ordered_items_in_warehouse(connection, "Washington DC Branch")
+
+    # read_item_stats_given_category_and_warehouse(
+    #     connection, "Office Supplies", "Washington DC Branch"
+    # )
+
+    # write_modify_items_price_safely(connection, 2, 15.999)
+
+    # read_item_stats_given_category_and_warehouse(
+    #     connection, "Office Supplies", "Washington DC Branch"
+    # )
+
     connection.close()
 
 
