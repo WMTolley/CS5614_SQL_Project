@@ -15,9 +15,15 @@ from sql_project.ReadCommands.staff_read_commands import (
     read_subordinates_of_employee,
     read_supervisors_of_employee,
 )
+from sql_project.ReadCommands.superior_read_commands import (
+    read_itemCount_given_warehouse,
+    read_iteminfo_in_warehouse,
+    read_statusChanges_of_employee,
+    read_subordinates_of_named_employee,
+)
 from sql_project.sql_commands import connect_and_init, show_items, show_statusChanges
 from sql_project.WriteCommands.staff_write_commands import (
-    write_delivered_as_available,
+    write_delivered_as_InStock,
     write_instock_as_unavailable,
 )
 
@@ -52,26 +58,34 @@ if __name__ == "__main__":
     show_statusChanges(connection)
 
     write_instock_as_unavailable(connection, 1, item_id="1")
-    write_delivered_as_available(connection, 1, item_id="1")
+    write_delivered_as_InStock(connection, 1, item_id="1")
     show_statusChanges(connection)
 
     read_ordered_items_in_warehouse(connection, "Washington DC Branch")
-    write_delivered_as_available(connection, 3, item_id="4")
+    write_delivered_as_InStock(connection, 3, item_id="4")
     show_statusChanges(connection)
 
-    write_delivered_as_available(connection, 1, item_id="4")
+    write_delivered_as_InStock(connection, 1, item_id="4")
     show_statusChanges(connection)
     read_ordered_items_in_warehouse(connection, "Washington DC Branch")
 
-    # read_item_stats_given_category_and_warehouse(
-    #     connection, "Office Supplies", "Washington DC Branch"
-    # )
+    read_subordinates_of_named_employee(connection, "Ezra Jedi")
 
-    # write_modify_items_price_safely(connection, 2, 15.999)
+    write_delivered_as_InStock(connection, 1, item_id="5")
+    write_delivered_as_InStock(connection, 1, item_id="7")
+    write_delivered_as_InStock(connection, 1, item_id="6")
 
-    # read_item_stats_given_category_and_warehouse(
-    #     connection, "Office Supplies", "Washington DC Branch"
-    # )
+    read_statusChanges_of_employee(connection, employee_id="3")
+
+    read_statusChanges_of_employee(connection, employee_name="Ezra Jedi")
+
+    read_itemCount_given_warehouse(connection, warehouse_id="1")
+
+    read_itemCount_given_warehouse(connection, warehouse_name="Rundown Salon")
+
+    read_iteminfo_in_warehouse(connection, warehouse_id="1")
+
+    read_iteminfo_in_warehouse(connection, warehouse_name="Rundown Salon")
 
     connection.close()
 

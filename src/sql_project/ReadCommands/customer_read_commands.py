@@ -58,14 +58,14 @@ def read_available_items_in_warehouse(conn, warehouse_name) -> dict:
 
                 if name not in items:
                     items[name] = []
-                items[name].append(f"(#{serial})")
+                items[name].append(f"{serial}")
 
             if not items:
                 print("No available items in this warehouse.")
                 return {}
 
             for name, serial_list in items.items():
-                serials_str = " ".join(serial_list)
+                serials_str = " ".join(f"(#{serial})" for serial in serial_list)
                 print(f"- {name} {serials_str}")
 
             return items
@@ -76,7 +76,7 @@ def read_available_items_in_warehouse(conn, warehouse_name) -> dict:
             return {}
 
 
-def read_ordered_items_in_warehouse(conn, warehouse_name):
+def read_ordered_items_in_warehouse(conn, warehouse_name) -> list:
     """Display the set of names of the ordered item given a public warehouse"""
     query_warehouse = """
         SELECT w.warehouse_id
@@ -170,7 +170,7 @@ def read_soldout_unordered_items(conn, warehouse_name) -> list:
     query_items = """WITH soldout_items AS (
         SELECT DISTINCT name
         FROM item
-        WHERE status IN ('Unavailable', 'Reserved')
+        WHERE status IN ('Unavailable', 'Reserved', 'Discarded')
         AND warehouse_id = %s
         AND name NOT IN (
             SELECT name 
@@ -320,7 +320,7 @@ def read_item_stats_given_name_and_warehouse(conn, item_name, warehouse_name) ->
                 supplier = row["supplier_name"]
                 id = row["item_id"]
 
-                items.append([price, supplier, serial])
+                items.append([price, supplier, serial, id])
                 print(f"- ${price} | {supplier} | {serial} (#{id})")
 
             return items
@@ -393,8 +393,8 @@ def read_item_stats_given_category_and_warehouse(
                 supplier = row["supplier_name"]
                 id = row["item_id"]
 
-                items.append([name, price, supplier, serial])
-                print(f"- {name} | ${price} | {supplier} | {serial} ({id})")
+                items.append([name, price, supplier, serial, id])
+                print(f"- {name} | ${price} | {supplier} | {serial} (#{id})")
 
             return items
 

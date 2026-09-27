@@ -62,8 +62,8 @@ def write_instock_as_unavailable(conn, employee_id, item_serial=None, item_id=No
         return None
 
 
-def write_delivered_as_available(conn, employee_id, item_serial=None, item_id=None):
-    """Modify the item with the specified itemID or ItemSerial thats delivered to available"""
+def write_delivered_as_InStock(conn, employee_id, item_serial=None, item_id=None):
+    """Modify the item with the specified itemID or ItemSerial thats delivered to In Stock"""
 
     if not item_serial and not item_id:
         print("Invalid: Didn't provide serial or id")
@@ -92,7 +92,7 @@ def write_delivered_as_available(conn, employee_id, item_serial=None, item_id=No
 
     query = """
         UPDATE item 
-        SET status = 'Available'
+        SET status = 'In Stock'
         WHERE item_id = %s
         AND status = 'Ordered'
         RETURNING item_id;
@@ -112,7 +112,7 @@ def write_delivered_as_available(conn, employee_id, item_serial=None, item_id=No
             if result:
                 cur.execute(
                     query_add_statuschange,
-                    ("Delivered", "Available", item_id, employee_id),
+                    ("Delivered", "In Stock", item_id, employee_id),
                 )
             conn.commit()
             return item_id
