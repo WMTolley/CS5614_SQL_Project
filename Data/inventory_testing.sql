@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS supplier (
 CREATE TABLE IF NOT EXISTS customer (
     customer_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
-    contact_info VARCHAR(255) NOT NULL
+    email VARCHAR(255),
+    phone VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS employee (
@@ -74,8 +75,7 @@ CREATE TABLE IF NOT EXISTS customerReturn (
     return_id SERIAL PRIMARY KEY,
     return_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
     condition VARCHAR(50) NOT NULL,
-    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE,
-    item_id INT REFERENCES item(item_id) ON DELETE SET NULL
+    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS supply (
@@ -104,7 +104,6 @@ CREATE TABLE IF NOT EXISTS warehouseTransfer (
 );
 
 CREATE TABLE IF NOT EXISTS management (
-    management_id SERIAL PRIMARY KEY,
     supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL,
     warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
 );
@@ -156,7 +155,7 @@ INSERT INTO supplier (name, contact_info) VALUES
 -------------------------------------------------------------------------------
 -- CUSTOMERS
 -------------------------------------------------------------------------------
-INSERT INTO customer (name, contact_info) VALUES 
+INSERT INTO customer (name, email) VALUES 
 ('Alpha Research Corp', 'contact@alpharesearch.org'),
 ('Omega Defense Systems', 'procurement@omegadef.com'),
 ('Euro Cargo Group', 'logistics@eurocargo.eu');
@@ -321,8 +320,8 @@ INSERT INTO customerTransaction (transaction_id, transaction_type, transaction_d
 (1, 'Sale', current_setting('test.anchor_time')::timestamp - INTERVAL '5 days', 12, 1),
 (2, 'Sale', current_setting('test.anchor_time')::timestamp - INTERVAL '4 days', 15, 2);
 
-INSERT INTO customerReturn (return_date, condition, transaction_id, item_id) VALUES 
-(current_setting('test.anchor_time')::timestamp - INTERVAL '2 days', 'Damaged Packaging', 2, 15);
+INSERT INTO customerReturn (return_date, condition, transaction_id) VALUES 
+(current_setting('test.anchor_time')::timestamp - INTERVAL '2 days', 'Damaged Packaging', 2);
 
 -------------------------------------------------------------------------------
 -- STATUS CHANGES (Audit Logs)

@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS supplier (
 CREATE TABLE IF NOT EXISTS customer (
     customer_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
-    contact_info VARCHAR(255) NOT NULL
+    email VARCHAR(255),
+    phone VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS employee (
@@ -55,8 +56,7 @@ CREATE TABLE IF NOT EXISTS customerReturn (
     return_id SERIAL PRIMARY KEY,
     return_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     condition VARCHAR(50) NOT NULL,
-    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE,
-    item_id INT REFERENCES item(item_id) ON DELETE SET NULL
+    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS supply (
@@ -85,7 +85,6 @@ CREATE TABLE IF NOT EXISTS warehouseTransfer (
 );
 
 CREATE TABLE IF NOT EXISTS management (
-    management_id SERIAL PRIMARY KEY,
     supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL,
     warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
 );
