@@ -1,27 +1,35 @@
 -- Clears Database
+DROP TABLE IF EXISTS zipCode CASCADE;
+DROP TABLE IF EXISTS warehouse CASCADE;
 DROP TABLE IF EXISTS itemCategory CASCADE;
-DROP TABLE IF EXISTS item CASCADE;
-DROP TABLE IF EXISTS customerTransaction CASCADE;
-DROP TABLE IF EXISTS customerReturn CASCADE;
 DROP TABLE IF EXISTS supplier CASCADE;
 DROP TABLE IF EXISTS customer CASCADE;
+DROP TABLE IF EXISTS employee CASCADE;
+DROP TABLE IF EXISTS item CASCADE;
+DROP TABLE IF EXISTS customerTransaction CASCADE;
+DROP TABLE IF EXISTS itemReturn CASCADE;
 DROP TABLE IF EXISTS supply CASCADE;
 DROP TABLE IF EXISTS statusChange CASCADE;
 DROP TABLE IF EXISTS warehouseTransfer CASCADE;
-DROP TABLE IF EXISTS warehouse CASCADE;
-DROP TABLE IF EXISTS employee CASCADE;
 DROP TABLE IF EXISTS management CASCADE;
 DROP TABLE IF EXISTS inventoryManager CASCADE;
-DROP TABLE IF EXISTS warehouseStaff CASCADE;
-DROP TABLE IF EXISTS supervisor CASCADE;
+DROP TABLE IF EXISTS warehouseStaff Cascade;
+DROP TABLE IF EXISTS supervisor Cascade;
 
 SET test.anchor_time = '2026-09-24 11:30:25';
 
 -- Code Identical to Data/inventory_run.sql
+CREATE TABLE IF NOT EXISTS zipCode (
+    zip VARCHAR(50) NOT NULL UNIQUE PRIMARY KEY,
+    city VARCHAR(50) NOT NULL,
+    country VARCHAR(50) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS warehouse (
     warehouse_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
-    location VARCHAR(50) NOT NULL,
+    street VARCHAR(50) NOT NULL,
+    zip VARCHAR(50) NOT NULL REFERENCES zipCode (zip) ON DELETE RESTRICT,
     is_public boolean NOT NULL
 );
 
@@ -32,23 +40,25 @@ CREATE TABLE IF NOT EXISTS itemCategory (
 
 CREATE TABLE IF NOT EXISTS supplier (
     supplier_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    contact_info VARCHAR(255) NOT NULL
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS customer (
     customer_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS employee (
     employee_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    contact_info VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(255),
     hire_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    final_date TIMESTAMP,
+    final_date TIMESTAMP DEFAULT NULL,
     home_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL,
     supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL
 );
@@ -56,32 +66,32 @@ CREATE TABLE IF NOT EXISTS employee (
 CREATE TABLE IF NOT EXISTS item (
     item_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    serial_number VARCHAR(50) NOT NULL,
+    serial_number VARCHAR(50) NOT NULL UNIQUE,
     status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
     markup_price NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
-    category_id INT REFERENCES itemCategory(category_id) ON DELETE SET NULL,
-    warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
+    category_id INT NOT NULL REFERENCES itemCategory(category_id) ON DELETE RESTRICT,
+    warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS customerTransaction (
     transaction_id SERIAL PRIMARY KEY,
     transaction_type VARCHAR(50) NOT NULL,
     transaction_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
-    customer_id INT REFERENCES customer(customer_id) ON DELETE CASCADE
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    customer_id INT NOT NULL REFERENCES customer(customer_id) ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS customerReturn (
+CREATE TABLE IF NOT EXISTS itemReturn (
     return_id SERIAL PRIMARY KEY,
     return_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    condition VARCHAR(50) NOT NULL,
-    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE
+    return_condition VARCHAR(50) NOT NULL,
+    transaction_id INT NOT NULL REFERENCES customerTransaction(transaction_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS supply (
     supply_id SERIAL PRIMARY KEY,
-    item_id INT REFERENCES item(item_id) ON DELETE SET NULL,
-    supplier_id INT REFERENCES supplier(supplier_id) ON DELETE SET NULL,
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    supplier_id INT NOT NULL REFERENCES supplier(supplier_id) ON DELETE RESTRICT,
     purchase_cost NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
     date_supplied TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL
 );
@@ -91,34 +101,35 @@ CREATE TABLE IF NOT EXISTS statusChange (
     old_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
     new_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
     operation_timestamp TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
-    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    employee_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS warehouseTransfer (
     transfer_id SERIAL PRIMARY KEY,
     transfer_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
-    origin_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
-    destination_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE CASCADE
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    origin_warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT,
+    destination_warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS management (
-    supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL,
-    warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
+    supervisor_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE CASCADE,
+    warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
+    PRIMARY KEY (supervisor_id, warehouse_id)
 );
 
 CREATE TABLE IF NOT EXISTS inventoryManager (
-    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS warehouseStaff (
-    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role VARCHAR(50)
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
+    role VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS supervisor (
-    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
 );
 
 
@@ -126,13 +137,21 @@ CREATE TABLE IF NOT EXISTS supervisor (
 -------------------------------------------------------------------------------
 -- WAREHOUSES
 -------------------------------------------------------------------------------
-INSERT INTO warehouse (name, location, is_public) VALUES 
-('Hawaii Depo', 'Hawaii, USA', true),
-('Alaska Station', 'Alaska, USA', true),
-('Big Ben', 'Big Ben, UK', true),
-('Antarctica Ace', 'Antarctica', true),
-('Secret Vault', 'Nevada, USA', false),
-('Shadow Depot', 'Berlin, Germany', false);
+INSERT INTO zipCode (zip, city, country) VALUES 
+('Hawaii, USA', 'IDK', 'USA'),
+('Alaska, USA', 'IDK', 'USA'),
+('Big Ben, UK', 'London', 'UK'),
+('Antarctica', 'None', 'None'),
+('Nevada, USA', 'IDK', 'USA'),
+('Berlin, Germany', 'Berlin', 'Germany');
+
+INSERT INTO warehouse (name, street, zip, is_public) VALUES 
+('Hawaii Depo', 'Hawaii Highway 101', 'Hawaii, USA', true),
+('Alaska Station', 'Avenue Avenue 101', 'Alaska, USA', true),
+('Big Ben', 'Universal UK 101', 'Big Ben, UK', true),
+('Antarctica Ace', 'Antarctica Avenue 101', 'Antarctica', true),
+('Secret Vault', 'Universal USA 101', 'Nevada, USA', false),
+('Shadow Depot', 'Shadow Street 101', 'Berlin, Germany', false);
 
 -------------------------------------------------------------------------------
 -- ITEM CATEGORIES
@@ -145,7 +164,7 @@ INSERT INTO itemCategory (name) VALUES
 -------------------------------------------------------------------------------
 -- SUPPLIERS
 -------------------------------------------------------------------------------
-INSERT INTO supplier (name, contact_info) VALUES 
+INSERT INTO supplier (name, email) VALUES 
 ('Global Optic Logistics', 'orders@globaloptics.com'),
 ('Apex Thermal Systems', 'support@apexthermal.de'),
 ('Titanium Industrial Foundry', 'b2b@titanfoundry.com'),
@@ -164,7 +183,7 @@ INSERT INTO customer (name, email) VALUES
 -- EMPLOYEES & STAFF ROLES
 -------------------------------------------------------------------------------
 -- Alaska Station (Warehouse 2): 3 supervisors, 10 staff
-INSERT INTO employee (employee_id, name, contact_info, home_warehouse_id, supervisor_id) VALUES
+INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id) VALUES
 (1, 'Alaska Super 1', 'alsuper1@company.com', 2, NULL),
 (2, 'Alaska Super 2', 'alsuper2@company.com', 2, 1),
 (3, 'Alaska Super 3', 'alsuper3@company.com', 2, 1),
@@ -180,7 +199,7 @@ INSERT INTO employee (employee_id, name, contact_info, home_warehouse_id, superv
 (13, 'Alaska Staff 10', 'alstaff10@company.com', 2, 3);
 
 -- Big Ben (Warehouse 3): 1 super of 1 super of 6 staff
-INSERT INTO employee (employee_id, name, contact_info, home_warehouse_id, supervisor_id) VALUES
+INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id) VALUES
 (14, 'Big Ben Tier 1 Super', 'bb_s1@company.com', 3, NULL),
 (15, 'Big Ben Tier 2 Super', 'bb_s2@company.com', 3, 14),
 (16, 'Big Ben Staff 1', 'bb_st1@company.com', 3, 15),
@@ -191,7 +210,7 @@ INSERT INTO employee (employee_id, name, contact_info, home_warehouse_id, superv
 (21, 'Big Ben Staff 6', 'bb_st6@company.com', 3, 15);
 
 -- Antarctica Ace (Warehouse 4): 5-deep supervisor chain
-INSERT INTO employee (employee_id, name, contact_info, home_warehouse_id, supervisor_id) VALUES
+INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id) VALUES
 (22, 'Antarctica Level 1', 'ant1@company.com', 4, NULL),
 (23, 'Antarctica Level 2', 'ant2@company.com', 4, 22),
 (24, 'Antarctica Level 3', 'ant3@company.com', 4, 23),

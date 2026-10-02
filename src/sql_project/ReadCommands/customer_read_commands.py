@@ -9,15 +9,15 @@ def read_public_warehouses(conn) -> list:
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         print("\n--- Warehouses ---")
         cur.execute("""
-            SELECT w.name, w.warehouse_id, w.location
+            SELECT w.name, w.warehouse_id, w.zip
             FROM warehouse w
             WHERE is_public;
         """)
         result = cur.fetchall()
         array_result = []
         for s in result:
-            array_result.append([s["warehouse_id"], s["name"], s["location"]])
-            print(f"{s['warehouse_id']}: {s['name']} ({s['location']})")
+            array_result.append([s["warehouse_id"], s["name"], s["zip"]])
+            print(f"{s['warehouse_id']}: {s['name']} ({s['zip']})")
         return array_result
     return []
 

@@ -1,8 +1,14 @@
+CREATE TABLE IF NOT EXISTS zipCode (
+    zip VARCHAR(50) NOT NULL UNIQUE PRIMARY KEY,
+    city VARCHAR(50) NOT NULL,
+    country VARCHAR(50) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS warehouse (
     warehouse_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
-    location VARCHAR(50) NOT NULL,
+    street VARCHAR(50) NOT NULL,
+    zip VARCHAR(50) NOT NULL REFERENCES zipCode (zip) ON DELETE RESTRICT,
     is_public boolean NOT NULL
 );
 
@@ -13,23 +19,25 @@ CREATE TABLE IF NOT EXISTS itemCategory (
 
 CREATE TABLE IF NOT EXISTS supplier (
     supplier_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    contact_info VARCHAR(255) NOT NULL
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS customer (
     customer_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
     email VARCHAR(255),
     phone VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS employee (
     employee_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    contact_info VARCHAR(255) NOT NULL UNIQUE,
-    hire_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    final_date TIMESTAMP,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(255),
+    hire_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
+    final_date TIMESTAMP DEFAULT NULL,
     home_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL,
     supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL
 );
@@ -37,67 +45,70 @@ CREATE TABLE IF NOT EXISTS employee (
 CREATE TABLE IF NOT EXISTS item (
     item_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    serial_number VARCHAR(50) NOT NULL,
+    serial_number VARCHAR(50) NOT NULL UNIQUE,
     status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
     markup_price NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
-    category_id INT REFERENCES itemCategory(category_id) ON DELETE SET NULL,
-    warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
+    category_id INT NOT NULL REFERENCES itemCategory(category_id) ON DELETE RESTRICT,
+    warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS customerTransaction (
     transaction_id SERIAL PRIMARY KEY,
     transaction_type VARCHAR(50) NOT NULL,
-    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
-    customer_id INT REFERENCES customer(customer_id) ON DELETE CASCADE
+    transaction_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    customer_id INT NOT NULL REFERENCES customer(customer_id) ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS customerReturn (
+CREATE TABLE IF NOT EXISTS itemReturn (
     return_id SERIAL PRIMARY KEY,
-    return_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    condition VARCHAR(50) NOT NULL,
-    transaction_id INT REFERENCES customerTransaction(transaction_id) ON DELETE CASCADE
+    return_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
+    return_condition VARCHAR(50) NOT NULL,
+    transaction_id INT NOT NULL REFERENCES customerTransaction(transaction_id) ON DELETE RESTRICT
 );
+
+--TODO: updates # got thtis far
 
 CREATE TABLE IF NOT EXISTS supply (
     supply_id SERIAL PRIMARY KEY,
-    item_id INT REFERENCES item(item_id) ON DELETE SET NULL,
-    supplier_id INT REFERENCES supplier(supplier_id) ON DELETE SET NULL,
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    supplier_id INT NOT NULL REFERENCES supplier(supplier_id) ON DELETE RESTRICT,
     purchase_cost NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
-    date_supplied TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    date_supplied TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS statusChange (
     status_change_id SERIAL PRIMARY KEY,
     old_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
     new_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
-    operation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
-    employee_id INT REFERENCES employee(employee_id) ON DELETE CASCADE
+    operation_timestamp TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    employee_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS warehouseTransfer (
     transfer_id SERIAL PRIMARY KEY,
-    transfer_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    item_id INT REFERENCES item(item_id) ON DELETE CASCADE,
-    origin_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
-    destination_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE CASCADE
+    transfer_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
+    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
+    origin_warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT,
+    destination_warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS management (
-    supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL,
-    warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL
+    supervisor_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE CASCADE,
+    warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
+    PRIMARY KEY (supervisor_id, warehouse_id)
 );
 
 CREATE TABLE IF NOT EXISTS inventoryManager (
-    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS warehouseStaff (
-    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role VARCHAR(50)
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
+    role VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS supervisor (
-    employee_id INT PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
 );
