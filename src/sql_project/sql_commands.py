@@ -70,6 +70,21 @@ def connect_and_init(sql_path):
     raise RuntimeError("ERROR: Database container not reachable.")
 
 
+def connect_and_init_safely(sql_path):
+    """Attempt 5 times to connect after DB container initialization"""
+    for _ in range(5):
+        try:
+            conn = psycopg2.connect(**DB_CONFIG)
+            conn.autocommit = True
+            with conn.cursor() as cur, open(sql_path, "r", encoding="utf-8") as f:
+                cur.execute(f.read())
+            conn.autocommit = False
+            return conn
+        except psycopg2.OperationalError:
+            time.sleep(2)
+    raise RuntimeError("ERROR: Database container not reachable.")
+
+
 # Exampe Function (TODO: Remove Later)
 def demonstrate_relationships(conn):
     """Example demonstration"""
