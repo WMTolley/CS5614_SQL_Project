@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS statusChange (
     status_change_id SERIAL PRIMARY KEY,
     old_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
     new_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
-    operation_timestamp TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
+    changed_at TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
     item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
     employee_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE RESTRICT
 );
@@ -339,13 +339,13 @@ INSERT INTO customerTransaction (transaction_id, transaction_type, transaction_d
 (1, 'Sale', current_setting('test.anchor_time')::timestamp - INTERVAL '5 days', 12, 1),
 (2, 'Sale', current_setting('test.anchor_time')::timestamp - INTERVAL '4 days', 15, 2);
 
-INSERT INTO customerReturn (return_date, condition, transaction_id) VALUES 
+INSERT INTO itemReturn (return_date, return_condition, transaction_id) VALUES 
 (current_setting('test.anchor_time')::timestamp - INTERVAL '2 days', 'Damaged Packaging', 2);
 
 -------------------------------------------------------------------------------
 -- STATUS CHANGES (Audit Logs)
 -------------------------------------------------------------------------------
-INSERT INTO statusChange (old_status, new_status, operation_timestamp, item_id, employee_id) VALUES 
+INSERT INTO statusChange (old_status, new_status, changed_at, item_id, employee_id) VALUES 
 ('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '30 days', 8, 16),
 ('Ordered', 'In Stock', current_setting('test.anchor_time')::timestamp - INTERVAL '28 days', 8, 16),
 ('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '20 days', 11, 17),
