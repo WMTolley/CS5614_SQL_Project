@@ -94,7 +94,7 @@ def write_delivered_as_InStock(conn, employee_id, item_serial=None, item_id=None
         UPDATE item 
         SET status = 'In Stock'
         WHERE item_id = %s
-        AND status = 'Ordered'
+        AND status = 'Delivered'
         RETURNING item_id;
     """
 

@@ -19,6 +19,7 @@ if __name__ == "__main__":
     connection.close()
 
 # Statuses:
+# Non-Existant
 # Ordered
 # Delivered
 # In Stock

@@ -181,11 +181,11 @@ def show_items(conn):
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         print("\n--- Items ---")
         cur.execute("""
-            SELECT s.item_id, s.name
+            SELECT s.item_id, s.name, warehouse_id
             FROM item s
         """)
         for s in cur.fetchall():
-            print(f"#{s['item_id']}: {s['name']}")
+            print(f"#{s['item_id']}: {s['name']} (in {s['warehouse_id']})")
 
 
 def show_items_with_category(conn):

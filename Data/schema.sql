@@ -121,10 +121,10 @@ CREATE TABLE IF NOT EXISTS statusChange (
     status_change_id SERIAL PRIMARY KEY,
     old_status VARCHAR(20) NOT NULL
         CONSTRAINT status_change_old_status_valid
-        CHECK (old_status IN ('Ordered', 'Delivered', 'In Stock', 'Reserved', 'Unavailable', 'Discarded')),
+        CHECK (old_status IN ('Non-Existant', 'Ordered', 'Delivered', 'In Stock', 'Reserved', 'Unavailable', 'Discarded')),
     new_status VARCHAR(20) NOT NULL
         CONSTRAINT status_change_new_status_valid
-        CHECK (new_status IN ('Ordered', 'Delivered', 'In Stock', 'Reserved', 'Unavailable', 'Discarded')),
+        CHECK (new_status IN ('Non-Existant', 'Ordered', 'Delivered', 'In Stock', 'Reserved', 'Unavailable', 'Discarded')),
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
     employee_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE RESTRICT,

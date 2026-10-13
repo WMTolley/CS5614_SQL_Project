@@ -26,6 +26,7 @@ from sql_project.WriteCommands.staff_write_commands import (
     write_delivered_as_InStock,
     write_instock_as_unavailable,
 )
+from sql_project.WriteCommands.superior_write_commands import write_order_item
 
 if __name__ == "__main__":
     connection = connect_and_init("Data/schema.sql", "Data/seed.sql")
@@ -86,6 +87,27 @@ if __name__ == "__main__":
     read_iteminfo_in_warehouse(connection, warehouse_id="1")
 
     read_iteminfo_in_warehouse(connection, warehouse_name="Rundown Salon")
+
+    read_statusChanges_of_employee(connection, employee_id="3")
+
+    write_order_item(connection, "1", "AddedItem", "ADDITEM", 15.00, 2, 3)
+
+    read_iteminfo_in_warehouse(connection, warehouse_id="2")
+
+    read_statusChanges_of_employee(connection, employee_id="3")
+
+    read_number_available_for_item(connection, "AddedItem")
+
+    read_item_stats_given_name_and_warehouse(
+        connection, "AddedItem", "Washington DC Branch"
+    )
+    write_delivered_as_InStock(connection, 1, item_id="21")
+
+    show_items(connection)
+
+    read_number_available_for_item(connection, "AddedItem")
+
+    # read_iteminfo_in_warehouse(connection, warehouse_id=2)
 
     connection.close()
 
