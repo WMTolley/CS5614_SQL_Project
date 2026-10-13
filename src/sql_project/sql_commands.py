@@ -56,13 +56,16 @@ def remove_student_safely(conn, student_id):
         print(f"ERROR: Failed to delete student: {e}")
 
 
-def connect_and_init(sql_path):
-    """Attempt 5 times to connect after DB container initialization"""
+def connect_and_init(*sql_paths):
+    """Attempt 5 times to connect after DB container initialization,
+    then run each SQL file in order (e.g. schema then seed)"""
     for _ in range(5):
         try:
             conn = psycopg2.connect(**DB_CONFIG)
-            with conn.cursor() as cur, open(sql_path, "r", encoding="utf-8") as f:
-                cur.execute(f.read())
+            with conn.cursor() as cur:
+                for sql_path in sql_paths:
+                    with open(sql_path, "r", encoding="utf-8") as f:
+                        cur.execute(f.read())
             conn.commit()
             return conn
         except psycopg2.OperationalError:
@@ -145,12 +148,12 @@ def show_statusChanges(conn):
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         print("\n--- StatusChanges ---")
         cur.execute("""
-            SELECT s.old_status, s.new_status, s.item_id, s.employee_id, s.operation_timestamp
+            SELECT s.old_status, s.new_status, s.item_id, s.employee_id, s.changed_at
             FROM statusChange s
         """)
         for s in cur.fetchall():
             print(
-                f"'{s['old_status']}' to '{s['new_status']}' (item #{s['item_id']}) by Employee ID: {s['employee_id']} on [{s['operation_timestamp']}]"
+                f"'{s['old_status']}' to '{s['new_status']}' (item #{s['item_id']}) by Employee ID: {s['employee_id']} on [{s['changed_at']}]"
             )
 
 
