@@ -29,7 +29,7 @@ from sql_project.WriteCommands.staff_write_commands import (
 from sql_project.WriteCommands.superior_write_commands import write_order_item
 
 if __name__ == "__main__":
-    connection = connect_and_init("Data/inventory_init.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/seed.sql")
     show_items(connection)
     read_public_warehouses(connection)
     read_available_items_in_warehouse(connection, "Washington DC Branch")

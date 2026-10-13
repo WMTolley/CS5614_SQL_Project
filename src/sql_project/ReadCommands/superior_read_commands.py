@@ -62,7 +62,7 @@ def read_statusChanges_of_employee(conn, employee_name=None, employee_id=None):
     """
 
     query_statusChanges = """
-        SELECT s.old_status, s.new_status, s.item_id, s.employee_id, s.operation_timestamp
+        SELECT s.old_status, s.new_status, s.item_id, s.employee_id, s.changed_at
         FROM statusChange s
         WHERE employee_id = %s;
     """
@@ -93,11 +93,11 @@ def read_statusChanges_of_employee(conn, employee_name=None, employee_id=None):
                         s["new_status"],
                         s["item_id"],
                         s["employee_id"],
-                        s["operation_timestamp"],
+                        s["changed_at"],
                     ]
                 )
                 print(
-                    f"'{s['old_status']}' to '{s['new_status']}' (item #{s['item_id']}) on [{s['operation_timestamp']}]"
+                    f"'{s['old_status']}' to '{s['new_status']}' (item #{s['item_id']}) on [{s['changed_at']}]"
                 )
             return array_result
 
