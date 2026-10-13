@@ -12,20 +12,20 @@ from sql_project.ReadCommands.customer_read_commands import (
     read_supplier_count_of_available_item,
 )
 from sql_project.sql_commands import (
-    connect_and_init_safely,
+    connect_and_init,
 )
 
 
 def test_readPublicWarehouses():
     """Tests that read_public_warehouses correctly sees all public warehouses"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_public_warehouses(connection)
         expectation = [
-            [1, "Hawaii Depo", "Hawaii, USA"],
-            [2, "Alaska Station", "Alaska, USA"],
-            [3, "Big Ben", "Big Ben, UK"],
-            [4, "Antarctica Ace", "Antarctica"],
+            [1, "Hawaii Depo", "1234 121"],
+            [2, "Alaska Station", "1234 289"],
+            [3, "Big Ben", "1234 357"],
+            [4, "Antarctica Ace", "1234 401"],
         ]
         assert result == expectation
     finally:
@@ -34,7 +34,7 @@ def test_readPublicWarehouses():
 
 def test_readAvailableItemsInWarehouse():
     """Tests that read_available_items_in_warehouse correctly sees available items in a given warehouse"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_available_items_in_warehouse(connection, "Invalid Warehouse")
         expectation = None
@@ -65,7 +65,7 @@ def test_readAvailableItemsInWarehouse():
 
 def test_readOrderedItemsInWarehouse():
     """Tests that read_ordered_items_in_warehouse correctly sees ordered items in a given warehouse"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_ordered_items_in_warehouse(connection, "Invalid Warehouse")
         expectation = None
@@ -97,7 +97,7 @@ def test_readOrderedItemsInWarehouse():
 
 def test_readNumberAvailableForItem():
     """Tests that read_number_available_for_item correctly counts the number of items in each public warehouse"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_number_available_for_item(connection, "Invalid Name")
         expectation = {
@@ -141,7 +141,7 @@ def test_readNumberAvailableForItem():
 
 def test_readSoldoutUnorderedItems():
     """Tests the read_soldout_unordered_items function"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_soldout_unordered_items(connection, "Invalid Name")
         expectation = None
@@ -157,20 +157,18 @@ def test_readSoldoutUnorderedItems():
 
         result = read_soldout_unordered_items(connection, "Alaska Station")
         expectation = [
-            ["Blown Fuse Box", datetime.datetime(2026, 9, 24, 11, 30, 25)],
-            ["Corrupted GPS Unit", datetime.datetime(2026, 9, 16, 11, 30, 25)],
-            ["Cracked Snow Goggles", datetime.datetime(2026, 9, 19, 11, 30, 25)],
-            ["Defective Arctic Tent", datetime.datetime(2026, 9, 12, 11, 30, 25)],
-            ["Flooded VHF Radio", datetime.datetime(2026, 9, 22, 11, 30, 25)],
-            ["Inaccessible Drill Rig", datetime.datetime(2026, 9, 9, 11, 30, 25)],
-            ["Locked Safety Vault", datetime.datetime(2026, 9, 14, 11, 30, 25)],
+            ["Blown Fuse Box", datetime.date(2026, 9, 24)],
+            ["Corrupted GPS Unit", datetime.date(2026, 9, 16)],
+            ["Cracked Snow Goggles", datetime.date(2026, 9, 19)],
+            ["Defective Arctic Tent", datetime.date(2026, 9, 12)],
+            ["Flooded VHF Radio", datetime.date(2026, 9, 22)],
+            ["Inaccessible Drill Rig", datetime.date(2026, 9, 9)],
+            ["Locked Safety Vault", datetime.date(2026, 9, 14)],
         ]
         assert result == expectation
 
         result = read_soldout_unordered_items(connection, "Big Ben")
-        expectation = [
-            ["Corrupted Storage Array", datetime.datetime(2026, 8, 14, 11, 30, 25)]
-        ]
+        expectation = [["Corrupted Storage Array", datetime.date(2026, 8, 14)]]
         assert result == expectation
 
         result = read_soldout_unordered_items(connection, "Antarctica Ace")
@@ -183,7 +181,7 @@ def test_readSoldoutUnorderedItems():
 
 def test_readSupplierCountAvailableItems():
     """Tests the read_supplier_count_of_available_item function"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_supplier_count_of_available_item(connection, "Invalid Name")
         expectation = {
@@ -237,7 +235,7 @@ def test_readSupplierCountAvailableItems():
 
 def test_readItemsStatsGivenName():
     """Tests the read_item_stats_given_name_and_warehouse function"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_item_stats_given_name_and_warehouse(
             connection, "Invalid Name", "Invalid Name"
@@ -271,7 +269,7 @@ def test_readItemsStatsGivenName():
 
 def test_readItemsStatsGivenCategory():
     """Tests the read_item_stats_given_category_and_warehouse function"""
-    connection = connect_and_init_safely("Data/inventory_testing.sql")
+    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
     try:
         result = read_item_stats_given_category_and_warehouse(
             connection, "Invalid Name", "Invalid Name"

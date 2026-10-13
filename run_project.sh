@@ -1,1 +1,1 @@
-python -m src.sql_project.continue || true
+python -m src.sql_project.inventory_init || true

@@ -1,157 +1,26 @@
--- Clears Database
-DROP TABLE IF EXISTS zipCode CASCADE;
-DROP TABLE IF EXISTS warehouse CASCADE;
-DROP TABLE IF EXISTS itemCategory CASCADE;
-DROP TABLE IF EXISTS supplier CASCADE;
-DROP TABLE IF EXISTS customer CASCADE;
-DROP TABLE IF EXISTS employee CASCADE;
-DROP TABLE IF EXISTS item CASCADE;
-DROP TABLE IF EXISTS customerTransaction CASCADE;
-DROP TABLE IF EXISTS itemReturn CASCADE;
-DROP TABLE IF EXISTS supply CASCADE;
-DROP TABLE IF EXISTS statusChange CASCADE;
-DROP TABLE IF EXISTS warehouseTransfer CASCADE;
-DROP TABLE IF EXISTS management CASCADE;
-DROP TABLE IF EXISTS inventoryManager CASCADE;
-DROP TABLE IF EXISTS warehouseStaff Cascade;
-DROP TABLE IF EXISTS supervisor Cascade;
-
-SET test.anchor_time = '2026-09-24 11:30:25';
-
--- Code Identical to Data/inventory_run.sql
-CREATE TABLE IF NOT EXISTS zipCode (
-    zip VARCHAR(50) NOT NULL UNIQUE PRIMARY KEY,
-    city VARCHAR(50) NOT NULL,
-    country VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS warehouse (
-    warehouse_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
-    street VARCHAR(50) NOT NULL,
-    zip VARCHAR(50) NOT NULL REFERENCES zipCode (zip) ON DELETE RESTRICT,
-    is_public boolean NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS itemCategory (
-    category_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS supplier (
-    supplier_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(255),
-    phone VARCHAR(255)
-);
-
-CREATE TABLE IF NOT EXISTS customer (
-    customer_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(255),
-    phone VARCHAR(255)
-);
-
-CREATE TABLE IF NOT EXISTS employee (
-    employee_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(255),
-    phone VARCHAR(255),
-    hire_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    final_date TIMESTAMP DEFAULT NULL,
-    home_warehouse_id INT REFERENCES warehouse(warehouse_id) ON DELETE SET NULL,
-    supervisor_id INT REFERENCES employee(employee_id) ON DELETE SET NULL
-);
-
-CREATE TABLE IF NOT EXISTS item (
-    item_id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    serial_number VARCHAR(50) NOT NULL UNIQUE,
-    status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
-    markup_price NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
-    category_id INT NOT NULL REFERENCES itemCategory(category_id) ON DELETE RESTRICT,
-    warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS customerTransaction (
-    transaction_id SERIAL PRIMARY KEY,
-    transaction_type VARCHAR(50) NOT NULL,
-    transaction_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
-    customer_id INT NOT NULL REFERENCES customer(customer_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS itemReturn (
-    return_id SERIAL PRIMARY KEY,
-    return_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    return_condition VARCHAR(50) NOT NULL,
-    transaction_id INT NOT NULL REFERENCES customerTransaction(transaction_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS supply (
-    supply_id SERIAL PRIMARY KEY,
-    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
-    supplier_id INT NOT NULL REFERENCES supplier(supplier_id) ON DELETE RESTRICT,
-    purchase_cost NUMERIC(10, 3) DEFAULT 0.000 NOT NULL,
-    date_supplied TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS statusChange (
-    status_change_id SERIAL PRIMARY KEY,
-    old_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
-    new_status VARCHAR(50) DEFAULT 'Ordered' NOT NULL,
-    changed_at TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
-    employee_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS warehouseTransfer (
-    transfer_id SERIAL PRIMARY KEY,
-    transfer_date TIMESTAMP DEFAULT current_setting('test.anchor_time')::timestamp NOT NULL,
-    item_id INT NOT NULL REFERENCES item(item_id) ON DELETE RESTRICT,
-    origin_warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT,
-    destination_warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE RESTRICT
-);
-
-CREATE TABLE IF NOT EXISTS management (
-    supervisor_id INT NOT NULL REFERENCES employee(employee_id) ON DELETE CASCADE,
-    warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
-    PRIMARY KEY (supervisor_id, warehouse_id)
-);
-
-CREATE TABLE IF NOT EXISTS inventoryManager (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS warehouseStaff (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS supervisor (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
-);
-
 
 --- SEED DATA ---
 -------------------------------------------------------------------------------
+
+SET test.anchor_time = '2026-09-24 11:30:25';
+
 -- WAREHOUSES
 -------------------------------------------------------------------------------
-INSERT INTO zipCode (zip, city, country) VALUES 
-('Hawaii, USA', 'IDK', 'USA'),
-('Alaska, USA', 'IDK', 'USA'),
-('Big Ben, UK', 'London', 'UK'),
-('Antarctica', 'None', 'None'),
-('Nevada, USA', 'IDK', 'USA'),
-('Berlin, Germany', 'Berlin', 'Germany');
+INSERT INTO zipCode (zip, city, state) VALUES 
+('1234 121', 'IDK', 'Hawaii'),
+('1234 289', 'IDK', 'Alaska'),
+('1234 357', 'London', 'None'),
+('1234 401', 'IceWall', 'None'),
+('1234 509', 'IDK', 'Nevada'),
+('1234 619', 'Berlin', 'None');
 
 INSERT INTO warehouse (name, street, zip, is_public) VALUES 
-('Hawaii Depo', 'Hawaii Highway 101', 'Hawaii, USA', true),
-('Alaska Station', 'Avenue Avenue 101', 'Alaska, USA', true),
-('Big Ben', 'Universal UK 101', 'Big Ben, UK', true),
-('Antarctica Ace', 'Antarctica Avenue 101', 'Antarctica', true),
-('Secret Vault', 'Universal USA 101', 'Nevada, USA', false),
-('Shadow Depot', 'Shadow Street 101', 'Berlin, Germany', false);
+('Hawaii Depo', 'Hawaii Highway 101', '1234 121', true),
+('Alaska Station', 'Avenue Avenue 101', '1234 289', true),
+('Big Ben', 'Universal UK 101', '1234 357', true),
+('Antarctica Ace', 'Antarctica Avenue 101', '1234 401', true),
+('Secret Vault', 'Universal USA 101', '1234 509', false),
+('Shadow Depot', 'Shadow Street 101', '1234 619', false);
 
 -------------------------------------------------------------------------------
 -- ITEM CATEGORIES
@@ -183,45 +52,45 @@ INSERT INTO customer (name, email) VALUES
 -- EMPLOYEES & STAFF ROLES
 -------------------------------------------------------------------------------
 -- Alaska Station (Warehouse 2): 3 supervisors, 10 staff
-INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id) VALUES
-(1, 'Alaska Super 1', 'alsuper1@company.com', 2, NULL),
-(2, 'Alaska Super 2', 'alsuper2@company.com', 2, 1),
-(3, 'Alaska Super 3', 'alsuper3@company.com', 2, 1),
-(4, 'Alaska Staff 1', 'alstaff1@company.com', 2, 2),
-(5, 'Alaska Staff 2', 'alstaff2@company.com', 2, 2),
-(6, 'Alaska Staff 3', 'alstaff3@company.com', 2, 2),
-(7, 'Alaska Staff 4', 'alstaff4@company.com', 2, 2),
-(8, 'Alaska Staff 5', 'alstaff5@company.com', 2, 2),
-(9, 'Alaska Staff 6', 'alstaff6@company.com', 2, 3),
-(10, 'Alaska Staff 7', 'alstaff7@company.com', 2, 3),
-(11, 'Alaska Staff 8', 'alstaff8@company.com', 2, 3),
-(12, 'Alaska Staff 9', 'alstaff9@company.com', 2, 3),
-(13, 'Alaska Staff 10', 'alstaff10@company.com', 2, 3);
+INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id, employee_type) VALUES
+(1, 'Alaska Super 1', 'alsuper1@company.com', 2, NULL, 'WarehouseStaff'),
+(2, 'Alaska Super 2', 'alsuper2@company.com', 2, 1, 'WarehouseStaff'),
+(3, 'Alaska Super 3', 'alsuper3@company.com', 2, 1, 'WarehouseStaff'),
+(4, 'Alaska Staff 1', 'alstaff1@company.com', 2, 2, 'WarehouseStaff'),
+(5, 'Alaska Staff 2', 'alstaff2@company.com', 2, 2, 'WarehouseStaff'),
+(6, 'Alaska Staff 3', 'alstaff3@company.com', 2, 2, 'WarehouseStaff'),
+(7, 'Alaska Staff 4', 'alstaff4@company.com', 2, 2, 'WarehouseStaff'),
+(8, 'Alaska Staff 5', 'alstaff5@company.com', 2, 2, 'WarehouseStaff'),
+(9, 'Alaska Staff 6', 'alstaff6@company.com', 2, 3, 'WarehouseStaff'),
+(10, 'Alaska Staff 7', 'alstaff7@company.com', 2, 3, 'WarehouseStaff'),
+(11, 'Alaska Staff 8', 'alstaff8@company.com', 2, 3, 'WarehouseStaff'),
+(12, 'Alaska Staff 9', 'alstaff9@company.com', 2, 3, 'WarehouseStaff'),
+(13, 'Alaska Staff 10', 'alstaff10@company.com', 2, 3, 'WarehouseStaff');
 
 -- Big Ben (Warehouse 3): 1 super of 1 super of 6 staff
-INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id) VALUES
-(14, 'Big Ben Tier 1 Super', 'bb_s1@company.com', 3, NULL),
-(15, 'Big Ben Tier 2 Super', 'bb_s2@company.com', 3, 14),
-(16, 'Big Ben Staff 1', 'bb_st1@company.com', 3, 15),
-(17, 'Big Ben Staff 2', 'bb_st2@company.com', 3, 15),
-(18, 'Big Ben Staff 3', 'bb_st3@company.com', 3, 15),
-(19, 'Big Ben Staff 4', 'bb_st4@company.com', 3, 15),
-(20, 'Big Ben Staff 5', 'bb_st5@company.com', 3, 15),
-(21, 'Big Ben Staff 6', 'bb_st6@company.com', 3, 15);
+INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id, employee_type) VALUES
+(14, 'Big Ben Tier 1 Super', 'bb_s1@company.com', 3, NULL, 'WarehouseStaff'),
+(15, 'Big Ben Tier 2 Super', 'bb_s2@company.com', 3, 14, 'WarehouseStaff'),
+(16, 'Big Ben Staff 1', 'bb_st1@company.com', 3, 15, 'WarehouseStaff'),
+(17, 'Big Ben Staff 2', 'bb_st2@company.com', 3, 15, 'WarehouseStaff'),
+(18, 'Big Ben Staff 3', 'bb_st3@company.com', 3, 15, 'WarehouseStaff'),
+(19, 'Big Ben Staff 4', 'bb_st4@company.com', 3, 15, 'WarehouseStaff'),
+(20, 'Big Ben Staff 5', 'bb_st5@company.com', 3, 15, 'WarehouseStaff'),
+(21, 'Big Ben Staff 6', 'bb_st6@company.com', 3, 15, 'WarehouseStaff');
 
 -- Antarctica Ace (Warehouse 4): 5-deep supervisor chain
-INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id) VALUES
-(22, 'Antarctica Level 1', 'ant1@company.com', 4, NULL),
-(23, 'Antarctica Level 2', 'ant2@company.com', 4, 22),
-(24, 'Antarctica Level 3', 'ant3@company.com', 4, 23),
-(25, 'Antarctica Level 4', 'ant4@company.com', 4, 24),
-(26, 'Antarctica Level 5', 'ant5@company.com', 4, 25),
-(27, 'Antarctica End Worker', 'ant6@company.com', 4, 26);
+INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id, employee_type) VALUES
+(22, 'Antarctica Level 1', 'ant1@company.com', 4, NULL, 'WarehouseStaff'),
+(23, 'Antarctica Level 2', 'ant2@company.com', 4, 22, 'WarehouseStaff'),
+(24, 'Antarctica Level 3', 'ant3@company.com', 4, 23, 'WarehouseStaff'),
+(25, 'Antarctica Level 4', 'ant4@company.com', 4, 24, 'WarehouseStaff'),
+(26, 'Antarctica Level 5', 'ant5@company.com', 4, 25, 'WarehouseStaff'),
+(27, 'Antarctica End Worker', 'ant6@company.com', 4, 26, 'WarehouseStaff');
 
 -- Promote to structural sub-tables
 INSERT INTO supervisor (employee_id) VALUES (1), (2), (3), (14), (15), (22), (23), (24), (25), (26);
 
-INSERT INTO warehouseStaff (employee_id, role) VALUES 
+INSERT INTO warehouseStaff (employee_id, role_type) VALUES 
 (4, 'Loader'), (5, 'Loader'), (6, 'Packer'), (7, 'Packer'), (8, 'Driver'), (9, 'Loader'), 
 (10, 'Loader'), (11, 'Packer'), (12, 'Packer'), (13, 'Driver'), (16, 'Handler'), (17, 'Handler'), 
 (18, 'Handler'), (19, 'Sorter'), (20, 'Sorter'), (21, 'Sorter'), (27, 'Cold-Storage Specialist');
@@ -346,16 +215,16 @@ INSERT INTO itemReturn (return_date, return_condition, transaction_id) VALUES
 -- STATUS CHANGES (Audit Logs)
 -------------------------------------------------------------------------------
 INSERT INTO statusChange (old_status, new_status, changed_at, item_id, employee_id) VALUES 
-('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '30 days', 8, 16),
+('Non-Existant', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '30 days', 8, 16),
 ('Ordered', 'In Stock', current_setting('test.anchor_time')::timestamp - INTERVAL '28 days', 8, 16),
-('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '20 days', 11, 17),
+('Non-Existant', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '20 days', 11, 17),
 ('Ordered', 'In Stock', current_setting('test.anchor_time')::timestamp - INTERVAL '18 days', 11, 17),
 ('In Stock', 'Unavailable', current_setting('test.anchor_time')::timestamp - INTERVAL '17 days', 11, 18),
-('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '15 days', 12, 16),
+('Non-Existant', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '15 days', 12, 16),
 ('Ordered', 'In Stock', current_setting('test.anchor_time')::timestamp - INTERVAL '12 days', 12, 19),
 ('In Stock', 'Delivered', current_setting('test.anchor_time')::timestamp - INTERVAL '5 days', 12, 14),
-('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '38 days', 15, 27),
+('Non-Existant', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '38 days', 15, 27),
 ('Ordered', 'Delivered', current_setting('test.anchor_time')::timestamp - INTERVAL '20 days', 15, 27),
-('Ordered', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '12 days', 21, 16),
+('Non-Existant', 'Ordered', current_setting('test.anchor_time')::timestamp - INTERVAL '12 days', 21, 16),
 ('Ordered', 'In Stock', current_setting('test.anchor_time')::timestamp - INTERVAL '10 days', 21, 16),
 ('In Stock', 'Unavailable', current_setting('test.anchor_time')::timestamp - INTERVAL '9 days', 21, 16);
