@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from sql_project.ReadCommands.customer_read_commands import (
     read_available_items_in_warehouse,
@@ -18,6 +19,14 @@ from sql_project.WriteCommands.superior_write_commands import (
 app = FastAPI()
 
 connection = connect_and_init("Data/schema.sql", "Data/seed.sql")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # http://localhost:8000/
