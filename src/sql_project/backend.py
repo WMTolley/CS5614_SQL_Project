@@ -1,10 +1,18 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 
 from sql_project.ReadCommands.customer_read_commands import (
     read_available_items_in_warehouse,
     read_public_warehouses,
 )
 from sql_project.sql_commands import connect_and_init
+from sql_project.WriteCommands.manager_write_commands import (
+    write_delete_warehouse,
+    write_new_warehouse,
+)
+from sql_project.WriteCommands.superior_write_commands import (
+    write_motify_markup_price,
+    write_order_item,
+)
 
 app = FastAPI()
 
@@ -34,19 +42,32 @@ def search(name: str):
     return {"Items": items}
 
 
-@app.post("/insert")
-def insert():
-    raise HTTPException(status_code=501)  # Unimplemented
+# http://localhost:8000/insert/hello/sjfe
+@app.get("/insert/{name}/{serial_number}")
+def insert(name: str, serial_number: str):
+    id = write_order_item(connection, 1, name, serial_number, 1.00, 2, 1)
+    return {"Added Item_ID:": id}
 
 
-@app.post("/update")
-def update():
-    raise HTTPException(status_code=501)  # Unimplemented
+# http://localhost:8000/insert_warehouse/great
+@app.get("/insert_warehouse/{name}")
+def insert_warehouse(name: str):
+    id = write_new_warehouse(connection, name, "1294", "60623", True)
+    return {"Added Warehouse_ID:": id}
 
 
-@app.delete("/delete")
-def delete():
-    raise HTTPException(status_code=501)  # Unimplemented
+# http://localhost:8000/update/2
+@app.get("/update/{id}")
+def update(id: int):
+    write_motify_markup_price(connection, 0.00, item_serial=None, item_id=id)
+    return {"message": f"Item {id} updated successfully"}
+
+
+# http://localhost:8000/delete/7
+@app.get("/delete/{id}")
+def delete(id: int):
+    name = write_delete_warehouse(connection, id)
+    return {"You deleted": name}
 
 
 if __name__ == "__main__":

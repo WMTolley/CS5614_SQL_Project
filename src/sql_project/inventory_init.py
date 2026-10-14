@@ -22,6 +22,11 @@ from sql_project.ReadCommands.superior_read_commands import (
     read_subordinates_of_named_employee,
 )
 from sql_project.sql_commands import connect_and_init, show_items, show_statusChanges
+from sql_project.WriteCommands.manager_write_commands import (
+    write_delete_warehouse,
+    write_new_warehouse,
+    write_warehouse_privacy,
+)
 from sql_project.WriteCommands.staff_write_commands import (
     write_delivered_as_InStock,
     write_instock_as_unavailable,
@@ -106,6 +111,28 @@ if __name__ == "__main__":
     show_items(connection)
 
     read_number_available_for_item(connection, "AddedItem")
+
+    print(read_public_warehouses(connection))
+
+    write_new_warehouse(connection, "Nice", "1294", "60623", True)
+
+    print(read_public_warehouses(connection))
+
+    write_warehouse_privacy(connection, 7, False)
+
+    print(read_public_warehouses(connection))
+
+    write_warehouse_privacy(connection, 7, True)
+
+    print(read_public_warehouses(connection))
+
+    write_delete_warehouse(connection, 7)
+
+    print(read_public_warehouses(connection))
+
+    write_delete_warehouse(connection, 6)
+
+    print(read_public_warehouses(connection))
 
     # read_iteminfo_in_warehouse(connection, warehouse_id=2)
 
