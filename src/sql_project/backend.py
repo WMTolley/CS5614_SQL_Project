@@ -8,6 +8,7 @@ from sql_project.sql_commands import connect_and_init
 from sql_project.WriteCommands.manager_write_commands import (
     write_delete_warehouse,
     write_new_warehouse,
+    write_warehouse_privacy,
 )
 from sql_project.WriteCommands.superior_write_commands import (
     write_motify_markup_price,
@@ -56,11 +57,18 @@ def insert_warehouse(name: str):
     return {"Added Warehouse_ID:": id}
 
 
-# http://localhost:8000/update/2
-@app.get("/update/{id}")
-def update(id: int):
-    write_motify_markup_price(connection, 0.00, item_serial=None, item_id=id)
+# http://localhost:8000/update/2/5.50
+@app.get("/update/{id}/{new_price}")
+def update(id: int, new_price: float):
+    write_motify_markup_price(connection, new_price, item_serial=None, item_id=id)
     return {"message": f"Item {id} updated successfully"}
+
+
+# http://localhost:8000/update_warehouse/7/true
+@app.get("/update_warehouse/{warehouse_id}/{is_public}")
+def update_warehouse(warehouse_id: int, is_public: bool):
+    name = write_warehouse_privacy(connection, warehouse_id, is_public)
+    return {"message": f"Warehouse {name} updated successfully"}
 
 
 # http://localhost:8000/delete/7
