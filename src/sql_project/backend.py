@@ -20,7 +20,7 @@ app = FastAPI()
 
 connection = connect_and_init("Data/schema.sql", "Data/seed.sql")
 
-
+# CORS compatibility. If not here, frontend will block access.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
