@@ -11,9 +11,11 @@ from sql_project.WriteCommands.manager_write_commands import (
     write_new_warehouse,
     write_warehouse_privacy,
 )
+from sql_project.WriteCommands.staff_write_commands import write_delivered_as_InStock
 from sql_project.WriteCommands.superior_write_commands import (
     write_motify_markup_price,
     write_order_item,
+    write_ordered_as_delivered,
 )
 
 app = FastAPI()
@@ -55,7 +57,12 @@ def search(name: str):
 # http://localhost:8000/insert/hello/sjfe
 @app.get("/insert/{name}/{serial_number}")
 def insert(name: str, serial_number: str):
+
     id = write_order_item(connection, 1, name, serial_number, 1.00, 2, 1)
+
+    # Temporary commands to auto-deliver item so it actually shows up with the Search query.
+    write_ordered_as_delivered(connection, 1, serial_number, id)
+    write_delivered_as_InStock(connection, 1, serial_number, id)
     return {"Added Item_ID:": id}
 
 
