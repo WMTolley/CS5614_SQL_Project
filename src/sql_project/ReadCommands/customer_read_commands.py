@@ -7,7 +7,7 @@ from psycopg2.extras import RealDictCursor
 def read_public_warehouses(conn) -> list:
     """Display the name, id, and location of each warehouse thats public"""
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        print("\n--- Warehouses ---")
+        # print("\n--- Warehouses ---")
         cur.execute("""
             SELECT w.name, w.warehouse_id, w.zip
             FROM warehouse w
@@ -17,7 +17,7 @@ def read_public_warehouses(conn) -> list:
         array_result = []
         for s in result:
             array_result.append([s["warehouse_id"], s["name"], s["zip"]])
-            print(f"{s['warehouse_id']}: {s['name']} ({s['zip']})")
+            # print(f"{s['warehouse_id']}: {s['name']} ({s['zip']})")
         return array_result
     return []
 
