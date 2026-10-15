@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from sql_project.ReadCommands.customer_read_commands import (
@@ -91,7 +91,9 @@ def update_warehouse(warehouse_id: int, is_public: bool):
 @app.get("/delete/{id}")
 def delete(id: int):
     name = write_delete_warehouse(connection, id)
-    return {"message": f"Attempted delete of {name}."}
+    if name == None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    return {"message": f"Deleted warehouse {name}."}
 
 
 if __name__ == "__main__":

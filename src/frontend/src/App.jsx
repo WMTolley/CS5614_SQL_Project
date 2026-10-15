@@ -243,7 +243,6 @@ function InsertPanel({onRefresh}) {
       const rawData = await response.json();
 
       console.log(rawData)
-      
       setMessage(rawData.message)
 
       onRefresh();
@@ -354,7 +353,8 @@ function DeletePanel({warehouses, onRefresh}) {
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
+        setMessage("Cannot delete warehouse with items.");
+        return;
       }
 
       const rawData = await response.json();
