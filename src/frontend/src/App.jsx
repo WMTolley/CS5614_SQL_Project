@@ -200,6 +200,7 @@ function InsertPanel({onRefresh}) {
   const [itemSerial, setItemSerial] = useState("");
 
   const [warehouseName, setWarehouseName] = useState("");
+  const [message, setMessage] = useState("")
 
   async function addItem() {
     try {
@@ -217,7 +218,7 @@ function InsertPanel({onRefresh}) {
       }
 
       const rawData = await response.json();
-
+      setMessage(rawData.message)
       console.log(rawData)
     }
     catch (err) {
@@ -242,6 +243,8 @@ function InsertPanel({onRefresh}) {
       const rawData = await response.json();
 
       console.log(rawData)
+      
+      setMessage(rawData.message)
 
       onRefresh();
     }
@@ -272,6 +275,7 @@ function InsertPanel({onRefresh}) {
 
         <button type="submit" onClick={() => addWarehouse()}>Insert Warehouse</button>
       </form>
+      {message}
     </section>
   );
 }

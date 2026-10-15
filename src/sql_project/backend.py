@@ -63,35 +63,35 @@ def insert(name: str, serial_number: str):
     # Temporary commands to auto-deliver item so it actually shows up with the Search query.
     write_ordered_as_delivered(connection, 1, serial_number, id)
     write_delivered_as_InStock(connection, 1, serial_number, id)
-    return {"Added Item_ID:": id}
+    return {"message": f"Added Item ID: {id}"}
 
 
 # http://localhost:8000/insert_warehouse/great
 @app.get("/insert_warehouse/{name}")
 def insert_warehouse(name: str):
     id = write_new_warehouse(connection, name, "1294", "60623", True)
-    return {"Added Warehouse_ID:": id}
+    return {"message": f"Added Warehouse ID: {id}"}
 
 
 # http://localhost:8000/update/2/5.50
 @app.get("/update/{id}/{new_price}")
 def update(id: int, new_price: float):
     write_motify_markup_price(connection, new_price, item_serial=None, item_id=id)
-    return {"message": f"Item {id} updated successfully"}
+    return {"message": f"Item {id} updated successfully."}
 
 
 # http://localhost:8000/update_warehouse/7/true
 @app.get("/update_warehouse/{warehouse_id}/{is_public}")
 def update_warehouse(warehouse_id: int, is_public: bool):
     name = write_warehouse_privacy(connection, warehouse_id, is_public)
-    return {"message": f"Warehouse {name} updated successfully"}
+    return {"message": f"Warehouse {name} updated successfully."}
 
 
 # http://localhost:8000/delete/7
 @app.get("/delete/{id}")
 def delete(id: int):
     name = write_delete_warehouse(connection, id)
-    return {"You deleted": name}
+    return {"message": f"Attempted delete of {name}."}
 
 
 if __name__ == "__main__":
