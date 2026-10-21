@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal
 
-from sql_project.ReadCommands.customer_read_commands import (
+from db.ReadCommands.customer_read_commands import (
     read_available_items_in_warehouse,
     read_item_stats_given_category_and_warehouse,
     read_item_stats_given_name_and_warehouse,
@@ -11,14 +11,14 @@ from sql_project.ReadCommands.customer_read_commands import (
     read_soldout_unordered_items,
     read_supplier_count_of_available_item,
 )
-from sql_project.sql_commands import (
+from db.sql_commands import (
     connect_and_init,
 )
 
 
 def test_readPublicWarehouses():
     """Tests that read_public_warehouses correctly sees all public warehouses"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_public_warehouses(connection)
         expectation = [
@@ -34,7 +34,7 @@ def test_readPublicWarehouses():
 
 def test_readAvailableItemsInWarehouse():
     """Tests that read_available_items_in_warehouse correctly sees available items in a given warehouse"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_available_items_in_warehouse(connection, "Invalid Warehouse")
         expectation = None
@@ -65,7 +65,7 @@ def test_readAvailableItemsInWarehouse():
 
 def test_readOrderedItemsInWarehouse():
     """Tests that read_ordered_items_in_warehouse correctly sees ordered items in a given warehouse"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_ordered_items_in_warehouse(connection, "Invalid Warehouse")
         expectation = None
@@ -97,7 +97,7 @@ def test_readOrderedItemsInWarehouse():
 
 def test_readNumberAvailableForItem():
     """Tests that read_number_available_for_item correctly counts the number of items in each public warehouse"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_number_available_for_item(connection, "Invalid Name")
         expectation = {
@@ -141,7 +141,7 @@ def test_readNumberAvailableForItem():
 
 def test_readSoldoutUnorderedItems():
     """Tests the read_soldout_unordered_items function"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_soldout_unordered_items(connection, "Invalid Name")
         expectation = None
@@ -181,7 +181,7 @@ def test_readSoldoutUnorderedItems():
 
 def test_readSupplierCountAvailableItems():
     """Tests the read_supplier_count_of_available_item function"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_supplier_count_of_available_item(connection, "Invalid Name")
         expectation = {
@@ -235,7 +235,7 @@ def test_readSupplierCountAvailableItems():
 
 def test_readItemsStatsGivenName():
     """Tests the read_item_stats_given_name_and_warehouse function"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_item_stats_given_name_and_warehouse(
             connection, "Invalid Name", "Invalid Name"
@@ -269,7 +269,7 @@ def test_readItemsStatsGivenName():
 
 def test_readItemsStatsGivenCategory():
     """Tests the read_item_stats_given_category_and_warehouse function"""
-    connection = connect_and_init("Data/schema.sql", "Data/inventory_testing.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_item_stats_given_category_and_warehouse(
             connection, "Invalid Name", "Invalid Name"

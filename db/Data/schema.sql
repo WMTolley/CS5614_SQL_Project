@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS customer (
 -- Supertype of warehouseStaff, supervisor and inventoryManager (discriminator: employee_type)
 CREATE TABLE IF NOT EXISTS employee (
     employee_id SERIAL PRIMARY KEY,
+    hashed_password VARCHAR(50) DEFAULT NULL,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) CONSTRAINT employee_email_format CHECK (email LIKE '_%@_%'),
     phone VARCHAR(20),

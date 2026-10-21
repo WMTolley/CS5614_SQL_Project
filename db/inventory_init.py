@@ -1,6 +1,6 @@
 """Creates the Inventory SQL database (reinitializes the database)"""
 
-from sql_project.ReadCommands.customer_read_commands import (
+from db.ReadCommands.customer_read_commands import (
     read_available_items_in_warehouse,
     read_item_stats_given_category_and_warehouse,
     read_item_stats_given_name_and_warehouse,
@@ -10,31 +10,31 @@ from sql_project.ReadCommands.customer_read_commands import (
     read_soldout_unordered_items,
     read_supplier_count_of_available_item,
 )
-from sql_project.ReadCommands.staff_read_commands import (
+from db.ReadCommands.staff_read_commands import (
     read_ordered_items_in_warehouse,
     read_subordinates_of_employee,
     read_supervisors_of_employee,
 )
-from sql_project.ReadCommands.superior_read_commands import (
+from db.ReadCommands.superior_read_commands import (
     read_itemCount_given_warehouse,
     read_iteminfo_in_warehouse,
     read_statusChanges_of_employee,
     read_subordinates_of_named_employee,
 )
-from sql_project.sql_commands import connect_and_init, show_items, show_statusChanges
-from sql_project.WriteCommands.manager_write_commands import (
+from db.sql_commands import connect_and_init, show_items, show_statusChanges
+from db.WriteCommands.manager_write_commands import (
     write_delete_warehouse,
     write_new_warehouse,
     write_warehouse_privacy,
 )
-from sql_project.WriteCommands.staff_write_commands import (
+from db.WriteCommands.staff_write_commands import (
     write_delivered_as_InStock,
     write_instock_as_unavailable,
 )
-from sql_project.WriteCommands.superior_write_commands import write_order_item
+from db.WriteCommands.superior_write_commands import write_order_item
 
 if __name__ == "__main__":
-    connection = connect_and_init("Data/schema.sql", "Data/seed.sql")
+    connection = connect_and_init("db/Data/schema.sql", "db/Data/seed.sql")
     show_items(connection)
     read_public_warehouses(connection)
     read_available_items_in_warehouse(connection, "Washington DC Branch")

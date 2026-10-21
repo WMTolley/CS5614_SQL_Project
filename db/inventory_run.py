@@ -1,6 +1,6 @@
 """Creates the Inventory SQL database (reinitializes the database)"""
 
-from sql_project.sql_commands import (
+from db.sql_commands import (
     connect_and_init,
     modify_items_categoryID_safely,
     show_items,

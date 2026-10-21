@@ -1,7 +1,7 @@
 FROM python:3.12-slim-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONPATH=/SQLWorkspace/src
+ENV PYTHONPATH=/SQLWorkspace
 
 # Install Development Tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     vim \
     tree \
+    nodejs \
+    npm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

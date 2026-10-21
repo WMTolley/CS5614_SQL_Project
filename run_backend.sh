@@ -1,1 +1,1 @@
-python src/sql_project/backend.py
+python backend/backend.py

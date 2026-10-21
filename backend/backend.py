@@ -1,18 +1,18 @@
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from sql_project.ReadCommands.customer_read_commands import (
+from db.ReadCommands.customer_read_commands import (
     read_available_items_in_warehouse,
     read_public_warehouses,
 )
-from sql_project.sql_commands import connect_and_init
-from sql_project.WriteCommands.manager_write_commands import (
+from db.sql_commands import connect_and_init
+from db.WriteCommands.manager_write_commands import (
     write_delete_warehouse,
     write_new_warehouse,
     write_warehouse_privacy,
 )
-from sql_project.WriteCommands.staff_write_commands import write_delivered_as_InStock
-from sql_project.WriteCommands.superior_write_commands import (
+from db.WriteCommands.staff_write_commands import write_delivered_as_InStock
+from db.WriteCommands.superior_write_commands import (
     write_motify_markup_price,
     write_order_item,
     write_ordered_as_delivered,
@@ -20,7 +20,7 @@ from sql_project.WriteCommands.superior_write_commands import (
 
 app = FastAPI()
 
-connection = connect_and_init("Data/schema.sql", "Data/seed.sql")
+connection = connect_and_init("db/Data/schema.sql", "db/Data/seed.sql")
 
 # CORS compatibility. If not here, frontend will block access.
 app.add_middleware(
