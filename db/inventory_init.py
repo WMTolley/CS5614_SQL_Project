@@ -10,6 +10,10 @@ from db.ReadCommands.customer_read_commands import (
     read_soldout_unordered_items,
     read_supplier_count_of_available_item,
 )
+from db.ReadCommands.manager_read_commands import (
+    read_employees_given_warehouse,
+    read_employees_without_warehouse,
+)
 from db.ReadCommands.staff_read_commands import (
     read_ordered_items_in_warehouse,
     read_subordinates_of_employee,
@@ -133,6 +137,10 @@ if __name__ == "__main__":
     write_delete_warehouse(connection, 6)
 
     print(read_public_warehouses(connection))
+
+    read_employees_given_warehouse(connection, warehouse_id=1)
+
+    print(read_employees_without_warehouse(connection))
 
     # read_iteminfo_in_warehouse(connection, warehouse_id=2)
 
