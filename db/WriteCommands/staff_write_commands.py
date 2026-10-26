@@ -2,6 +2,8 @@
 
 import psycopg2
 
+# Same write permissions as the customer's write permissions
+
 
 def write_instock_as_unavailable(conn, employee_id, item_serial=None, item_id=None):
     """Modify the item with the specified itemID or ItemSerial thats instock to unavailable"""
