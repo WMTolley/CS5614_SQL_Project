@@ -41,12 +41,12 @@ def read_available_items_in_warehouse(conn, warehouse_name) -> dict:
             warehouse_row = cur.fetchone()
 
             if not warehouse_row:
-                print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
+                # print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
                 return None
 
             warehouse_id = warehouse_row["warehouse_id"]
 
-            print(f"\n--- Available Items in Warehouse ({warehouse_name}) ---")
+            # print(f"\n--- Available Items in Warehouse ({warehouse_name}) ---")
             cur.execute(query_items, (warehouse_id,))
             items_rows = cur.fetchall()
 
@@ -61,12 +61,12 @@ def read_available_items_in_warehouse(conn, warehouse_name) -> dict:
                 items[name].append(f"{serial}")
 
             if not items:
-                print("No available items in this warehouse.")
+                # print("No available items in this warehouse.")
                 return {}
 
-            for name, serial_list in items.items():
-                serials_str = " ".join(f"(#{serial})" for serial in serial_list)
-                print(f"- {name} {serials_str}")
+            # for name, serial_list in items.items():
+            #     serials_str = " ".join(f"(#{serial})" for serial in serial_list)
+            # print(f"- {name} {serials_str}")
 
             return items
 
@@ -95,12 +95,12 @@ def read_ordered_items_in_warehouse(conn, warehouse_name) -> list:
             warehouse_row = cur.fetchone()
 
             if not warehouse_row:
-                print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
+                # print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
                 return None
 
             warehouse_id = warehouse_row["warehouse_id"]
 
-            print(f"\n--- Ordered Items for Warehouse ({warehouse_name}) ---")
+            # print(f"\n--- Ordered Items for Warehouse ({warehouse_name}) ---")
             cur.execute(query_items, (warehouse_id,))
             items = cur.fetchall()
 
@@ -113,11 +113,11 @@ def read_ordered_items_in_warehouse(conn, warehouse_name) -> list:
                     seen_ids.add(row["name"])
 
             if not unique_items:
-                print("No available items in this warehouse.")
+                # print("No available items in this warehouse.")
                 return []
 
-            for item in unique_items:
-                print(f"- {item}")
+            # for item in unique_items:
+            #     print(f"- {item}")
 
             return unique_items
 
@@ -144,13 +144,13 @@ def read_number_available_for_item(conn, item_name) -> dict:
     """
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            print(f"\n--- Number of {item_name}(s) ---")
+            # print(f"\n--- Number of {item_name}(s) ---")
             cur.execute(query_warehouse, (item_name,))
             result = cur.fetchall()
 
             dictionary_result = {}
             for s in result:
-                print(f"{s['warehouse_name']}: {s['stock_count']}")
+                # print(f"{s['warehouse_name']}: {s['stock_count']}")
                 dictionary_result[s["warehouse_name"]] = s["stock_count"]
             return dictionary_result
     except psycopg2.Error as e:
@@ -203,17 +203,17 @@ def read_soldout_unordered_items(conn, warehouse_name) -> list:
             warehouse_row = cur.fetchone()
 
             if not warehouse_row:
-                print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
+                # print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
                 return None
 
             warehouse_id = warehouse_row["warehouse_id"]
 
-            print(f"\n--- Unavailable Items in Warehouse ({warehouse_name}) ---")
+            # print(f"\n--- Unavailable Items in Warehouse ({warehouse_name}) ---")
             cur.execute(query_items, (warehouse_id, warehouse_id, warehouse_id))
             items_rows = cur.fetchall()
 
             if len(items_rows) <= 0:
-                print("None Found")
+                # print("None Found")
                 return []
 
             items = []
@@ -222,7 +222,7 @@ def read_soldout_unordered_items(conn, warehouse_name) -> list:
                 name = row["name"]
                 time = row["latesttimestamp"]
                 items.append([name, time])
-                print(f"- {name} [{time}]")
+                # print(f"- {name} [{time}]")
 
             return items
 
@@ -252,7 +252,7 @@ def read_supplier_count_of_available_item(conn, item_name) -> dict:
     """
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            print(f"\n--- Suppliers of {item_name}(s) ---")
+            # print(f"\n--- Suppliers of {item_name}(s) ---")
             cur.execute(query_warehouse, (item_name,))
             result = cur.fetchall()
             dictionary_result = {}
@@ -262,11 +262,10 @@ def read_supplier_count_of_available_item(conn, item_name) -> dict:
                 if warehouse not in dictionary_result:
                     dictionary_result[warehouse] = []
                 dictionary_result[warehouse].append(f"{supplier}")
-            for s, j in dictionary_result.items():
-                print(f"{s}")
-                for k in j:
-                    print(f"- {k}")
-            # print(dictionary_result)
+            # for s, j in dictionary_result.items():
+            #     print(f"{s}")
+            #     for k in j:
+            #         print(f"- {k}")
             return dictionary_result
     except psycopg2.Error as e:
         print(f"ERROR: Database error while processing lookup: {e}")
@@ -299,17 +298,17 @@ def read_item_stats_given_name_and_warehouse(conn, item_name, warehouse_name) ->
             warehouse_row = cur.fetchone()
 
             if not warehouse_row:
-                print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
+                # print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
                 return None
 
             warehouse_id = warehouse_row["warehouse_id"]
 
-            print(f"\n--- Info of {item_name}(s) in ({warehouse_name}) ---")
+            # print(f"\n--- Info of {item_name}(s) in ({warehouse_name}) ---")
             cur.execute(query_items, (warehouse_id, item_name))
             items_rows = cur.fetchall()
 
             if len(items_rows) <= 0:
-                print("None Found")
+                # print("None Found")
                 return []
 
             items = []
@@ -321,7 +320,7 @@ def read_item_stats_given_name_and_warehouse(conn, item_name, warehouse_name) ->
                 id = row["item_id"]
 
                 items.append([price, supplier, serial, id])
-                print(f"- ${price} | {supplier} | {serial} (#{id})")
+                # print(f"- ${price} | {supplier} | {serial} (#{id})")
 
             return items
 
@@ -364,7 +363,7 @@ def read_item_stats_given_category_and_warehouse(
             warehouse_row = cur.fetchone()
 
             if not warehouse_row:
-                print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
+                # print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
                 return None
 
             warehouse_id = warehouse_row["warehouse_id"]
@@ -372,16 +371,16 @@ def read_item_stats_given_category_and_warehouse(
             category_row = cur.fetchone()
 
             if not category_row:
-                print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
+                # print(f"\nInvalid: No warehouse found with name '{warehouse_name}'")
                 return None
 
             category_id = category_row["category_id"]
-            print(f"\n--- Info of all {category_name}(s) in ({warehouse_name}) ---")
+            # print(f"\n--- Info of all {category_name}(s) in ({warehouse_name}) ---")
             cur.execute(query_items, (warehouse_id, category_id))
             items_rows = cur.fetchall()
 
             if len(items_rows) <= 0:
-                print("None Found")
+                # print("None Found")
                 return []
 
             items = []
@@ -394,7 +393,7 @@ def read_item_stats_given_category_and_warehouse(
                 id = row["item_id"]
 
                 items.append([name, price, supplier, serial, id])
-                print(f"- {name} | ${price} | {supplier} | {serial} (#{id})")
+                # print(f"- {name} | ${price} | {supplier} | {serial} (#{id})")
 
             return items
 

@@ -15,6 +15,12 @@ from db.sql_commands import (
     connect_and_init,
 )
 
+# For every get function with a paramter make sure to see if its possible to test:
+#    An invalid input that should return None (ie asking about items in a nonexistant warehouse)
+#    An input that requires other permission should return None (ie asking about items in a private warehouse)
+#    An input that should return nothing / [] (ie asking about items in a warehouse thats empty)
+#    A valid input
+
 
 def test_readPublicWarehouses():
     """Tests that read_public_warehouses correctly sees all public warehouses"""
@@ -37,6 +43,10 @@ def test_readAvailableItemsInWarehouse():
     connection = connect_and_init("db/Data/schema.sql", "db/Data/inventory_testing.sql")
     try:
         result = read_available_items_in_warehouse(connection, "Invalid Warehouse")
+        expectation = None
+        assert result == expectation
+
+        result = read_available_items_in_warehouse(connection, "Secret Vault")
         expectation = None
         assert result == expectation
 
@@ -71,7 +81,7 @@ def test_readOrderedItemsInWarehouse():
         expectation = None
         assert result == expectation
 
-        result = read_ordered_items_in_warehouse(connection, "Shadow Depot")
+        result = read_ordered_items_in_warehouse(connection, "Secret Vault")
         expectation = None
         assert result == expectation
 
@@ -247,11 +257,19 @@ def test_readItemsStatsGivenName():
             connection, "Inaccessible Drill Rig", "Invalid Name"
         )
         expectation = None
+        assert result == expectation
+
+        result = read_item_stats_given_name_and_warehouse(
+            connection, "Inaccessible Drill Rig", "Secret Vault"
+        )
+        expectation = None
+        assert result == expectation
 
         result = read_item_stats_given_name_and_warehouse(
             connection, "Invalid Name", "Big Ben"
         )
         expectation = []
+        assert result == expectation
 
         result = read_item_stats_given_name_and_warehouse(
             connection, "Quantum Core Switch", "Big Ben"
@@ -281,16 +299,31 @@ def test_readItemsStatsGivenCategory():
             connection, "Electronics", "Invalid Name"
         )
         expectation = None
+        assert result == expectation
+
+        result = read_item_stats_given_category_and_warehouse(
+            connection, "Electronics", "Secret Vault"
+        )
+        expectation = None
+        assert result == expectation
 
         result = read_item_stats_given_category_and_warehouse(
             connection, "Invalid Name", "Big Ben"
         )
-        expectation = []
+        expectation = None
+        assert result == expectation
 
         result = read_item_stats_given_category_and_warehouse(
             connection, "Electronics", "Shadow Depot"
         )
+        expectation = None
+        assert result == expectation
+
+        result = read_item_stats_given_category_and_warehouse(
+            connection, "Electronics", "Hawaii Depo"
+        )
         expectation = []
+        assert result == expectation
 
         result = read_item_stats_given_category_and_warehouse(
             connection, "Electronics", "Big Ben"

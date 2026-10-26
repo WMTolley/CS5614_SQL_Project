@@ -1,4 +1,4 @@
-.PHONY: clean lint test test-cov test-html mutate help run init
+.PHONY: clean lint test mutate help frontend backend
 
 # Default argument when none are provided
 .DEFAULT_GOAL := help
@@ -8,8 +8,6 @@ help:
 	@echo "Available commands:"
 	@echo "  make lint       - Run static code analysis using pylint"
 	@echo "  make test       - Run the pytest test suite"
-	@echo "  make test-cov   - Run tests and display terminal coverage report"
-	@echo "  make test-html  - Run tests, generate HTML report, and serve locally"
 	@echo "  make mutate     - Run mutmut mutation testing"
 	@echo "  make clean      - Remove build, cache, test, and python artifacts"
 	@echo "  make run      	 - Modifies the SQL database, without reinitializing the database"
@@ -25,16 +23,16 @@ clean:
 	@find . -type d -name "__pycache__" -exec rm -rf {} +
 	@echo "Clean complete."
 
-run:
-	@echo "Running Code"
-	@echo python -m src.sql_project.continue 
-	@python -m src.sql_project.continue || true
+# To run the frontend code
+frontend:
+	@echo "Running FrontEnd"
+	@./run_frontend.sh
 	@echo "Done"
 
-init:
-	@echo "Running Code"
-	@echo python -m src.sql_project.init 
-	@python -m src.sql_project.init || true
+# To run the backend code
+backend:
+	@echo "Running BackEnd"
+	@./run_backend.sh
 	@echo "Done"
 
 # To statically analyze the code.
@@ -52,21 +50,6 @@ test: clean
 	@echo ./run_pytest.sh
 	@./run_pytest.sh || true
 	@echo "Test Suite Complete"
-
-# To run the provided tests classes and view the code coverage.
-test-cov: clean
-	@echo "Running tests with terminal coverage reporting..."
-	@echo python -m pytest --cov=src --cov-report=term-missing --cov-branch
-	@python -m pytest --cov=src --cov-report=term-missing --cov-branch || true
-	@echo "Test Coverage Complete"
-
-# To run the provided tests classes and view the code coverage in a html format.
-test-html: clean
-	@echo "Generating HTML coverage report..."
-	@echo python -m pytest --cov=src --cov-report=html --cov-branch
-	@python -m pytest --cov=src --cov-report=html --cov-branch || true
-	@echo "Starting local coverage server at http://localhost:8080/ (Press Ctrl+C to stop)..."
-	python -m http.server 8080 --directory htmlcov
 
 # To run a mutation test on the code.
 mutate: clean
