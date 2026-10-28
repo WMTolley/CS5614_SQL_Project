@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS supplier (
 
 CREATE TABLE IF NOT EXISTS customer (
     customer_id SERIAL PRIMARY KEY,
+    hashed_password VARCHAR(50) DEFAULT NULL,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) CONSTRAINT customer_email_format CHECK (email LIKE '_%@_%'),
     phone VARCHAR(20),
@@ -151,11 +152,13 @@ CREATE TABLE IF NOT EXISTS warehouseStaff (
 );
 
 CREATE TABLE IF NOT EXISTS supervisor (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
+    role_type VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS inventoryManager (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
+    role_type VARCHAR(30) NOT NULL
 );
 
 -- Which inventory managers manage which warehouses (M:N)
