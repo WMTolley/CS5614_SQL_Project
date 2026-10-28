@@ -2,6 +2,8 @@
 -- Rebuild from scratch:  psql -f Data/schema.sql -f Data/seed.sql
 
 -- Clears Database
+DROP TABLE IF EXISTS userSession CASCADE;
+DROP TABLE IF EXISTS userAccount CASCADE;
 DROP TABLE IF EXISTS zipCode CASCADE;
 DROP TABLE IF EXISTS warehouse CASCADE;
 DROP TABLE IF EXISTS itemCategory CASCADE;
@@ -60,7 +62,6 @@ CREATE TABLE IF NOT EXISTS customer (
 -- Supertype of warehouseStaff, supervisor and inventoryManager (discriminator: employee_type)
 CREATE TABLE IF NOT EXISTS employee (
     employee_id SERIAL PRIMARY KEY,
-    hashed_password VARCHAR(50) DEFAULT NULL,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) CONSTRAINT employee_email_format CHECK (email LIKE '_%@_%'),
     phone VARCHAR(20),
@@ -163,4 +164,34 @@ CREATE TABLE IF NOT EXISTS management (
     employee_id INT NOT NULL REFERENCES inventoryManager(employee_id) ON DELETE CASCADE,
     warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
     PRIMARY KEY (employee_id, warehouse_id)
+);
+
+-- Login credentials. An account is either the admin (no profile) or linked to exactly one
+-- customer or employee. An employee's permissions come from employee.employee_type.
+CREATE TABLE IF NOT EXISTS userAccount (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE NOT NULL,
+    customer_id INT UNIQUE REFERENCES customer(customer_id) ON DELETE CASCADE,
+    employee_id INT UNIQUE REFERENCES employee(employee_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    -- Admins have no profile; everyone else is exactly one of customer or employee
+    CONSTRAINT account_profile_valid CHECK (
+        (is_admin AND customer_id IS NULL AND employee_id IS NULL)
+        OR (NOT is_admin AND num_nonnulls(customer_id, employee_id) = 1)
+    )
+);
+
+-- Usernames are case-insensitive
+CREATE UNIQUE INDEX IF NOT EXISTS userAccount_username_lower
+    ON userAccount (lower(username));
+
+-- Server-side login sessions; only a hash of the token is stored. Logout deletes the row.
+CREATE TABLE IF NOT EXISTS userSession (
+    token_hash VARCHAR(64) PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES userAccount(user_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    CONSTRAINT session_expires_after_created CHECK (expires_at > created_at)
 );
