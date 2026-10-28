@@ -7,9 +7,9 @@ import uuid
 import pytest
 
 PASSWORD = "a-good-password"
-# Employee 3 (Jace One, WarehouseStaff) is active; employee 25 (Zoe Carter) has left
+# Employee 3 (Jace One, WarehouseStaff) is active; employee 24 (Zoe Carter) has left
 ACTIVE_EMPLOYEE_ID = 3
-TERMINATED_EMPLOYEE_ID = 25
+TERMINATED_EMPLOYEE_ID = 24
 
 
 def new_username():

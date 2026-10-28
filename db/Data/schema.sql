@@ -77,7 +77,9 @@ CREATE TABLE IF NOT EXISTS employee (
     -- An employee can't leave before they were hired
     CONSTRAINT employee_dates_in_order CHECK (final_date IS NULL OR final_date >= hire_date),
     -- An employee can't supervise themselves
-    CONSTRAINT employee_not_own_supervisor CHECK (supervisor_id <> employee_id)
+    CONSTRAINT employee_not_own_supervisor CHECK (supervisor_id <> employee_id),
+    -- Lets the subtype tables reference (employee_id, employee_type) together
+    CONSTRAINT employee_id_type_unique UNIQUE (employee_id, employee_type)
 );
 
 -- Item lifecycle: Ordered -> Delivered -> In Stock -> Reserved/Unavailable/Discarded
@@ -145,18 +147,34 @@ CREATE TABLE IF NOT EXISTS warehouseTransfer (
         CHECK (origin_warehouse_id <> destination_warehouse_id)
 );
 
--- Employee subtypes
+-- Employee subtypes. Each one repeats the discriminator as a constant and references
+-- (employee_id, employee_type), so a row can only exist for an employee of that type.
 CREATE TABLE IF NOT EXISTS warehouseStaff (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role_type VARCHAR(30) NOT NULL
+    employee_id INT NOT NULL PRIMARY KEY,
+    employee_type VARCHAR(20) DEFAULT 'WarehouseStaff' NOT NULL
+        CONSTRAINT warehouse_staff_type CHECK (employee_type = 'WarehouseStaff'),
+    role_type VARCHAR(30) NOT NULL,
+    CONSTRAINT warehouse_staff_is_employee_of_type
+        FOREIGN KEY (employee_id, employee_type)
+        REFERENCES employee(employee_id, employee_type) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS supervisor (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY,
+    employee_type VARCHAR(20) DEFAULT 'Supervisor' NOT NULL
+        CONSTRAINT supervisor_type CHECK (employee_type = 'Supervisor'),
+    CONSTRAINT supervisor_is_employee_of_type
+        FOREIGN KEY (employee_id, employee_type)
+        REFERENCES employee(employee_id, employee_type) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS inventoryManager (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE
+    employee_id INT NOT NULL PRIMARY KEY,
+    employee_type VARCHAR(20) DEFAULT 'InventoryManager' NOT NULL
+        CONSTRAINT inventory_manager_type CHECK (employee_type = 'InventoryManager'),
+    CONSTRAINT inventory_manager_is_employee_of_type
+        FOREIGN KEY (employee_id, employee_type)
+        REFERENCES employee(employee_id, employee_type) ON DELETE CASCADE
 );
 
 -- Which inventory managers manage which warehouses (M:N)
