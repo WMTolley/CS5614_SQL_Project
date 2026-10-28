@@ -38,7 +38,7 @@ def read_subordinates_of_named_employee(conn, employee_name):
 
             array_result = []
             for s in subordinates_names:
-                array_result.append([s["name"]])
+                array_result.append(s["name"])
                 print(f"- {s['name']}")
             return array_result
 
@@ -62,7 +62,7 @@ def read_statusChanges_of_employee(conn, employee_name=None, employee_id=None):
     """
 
     query_statusChanges = """
-        SELECT s.old_status, s.new_status, s.item_id, s.employee_id, s.changed_at
+        SELECT s.old_status, s.new_status, s.item_id, s.changed_at
         FROM statusChange s
         WHERE employee_id = %s;
     """
@@ -92,7 +92,6 @@ def read_statusChanges_of_employee(conn, employee_name=None, employee_id=None):
                         s["old_status"],
                         s["new_status"],
                         s["item_id"],
-                        s["employee_id"],
                         s["changed_at"],
                     ]
                 )
@@ -122,14 +121,13 @@ def read_itemCount_given_warehouse(conn, warehouse_name=None, warehouse_id=None)
 
     query_warehouse = """
         SELECT 
-            i.name,
-            COALESCE(COUNT(i.name), 0) AS stock_count,
-            max(s.date_supplied) AS LastestOrdered
+            i.name, 
+            COUNT(CASE WHEN i.status = 'In Stock' THEN 1 END) AS stock_count, 
+            MAX(s.date_supplied) AS LastestOrdered 
         FROM item i 
-        LEFT OUTER JOIN supply s ON
-            (i.item_id = s.item_id)
-        WHERE i.warehouse_id = %s
-        GROUP BY i.name
+        LEFT OUTER JOIN supply s ON (i.item_id = s.item_id) 
+        WHERE i.warehouse_id = %s 
+        GROUP BY i.name 
         ORDER BY LastestOrdered DESC
         
     """
@@ -142,7 +140,7 @@ def read_itemCount_given_warehouse(conn, warehouse_name=None, warehouse_id=None)
                 possible_warehouse_id = cur.fetchone()
                 if not possible_warehouse_id:
                     print("Name not found.")
-                    return None
+                    return []
                 warehouse_id = possible_warehouse_id["warehouse_id"]
 
             else:
@@ -212,7 +210,7 @@ def read_iteminfo_in_warehouse(conn, warehouse_name=None, warehouse_id=None) -> 
                 # print(possible_warehouse_id)
                 if not possible_warehouse_id:
                     print("Name not found.")
-                    return None
+                    return []
                 warehouse_id = possible_warehouse_id["warehouse_id"]
 
             else:
