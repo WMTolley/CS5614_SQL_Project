@@ -1,6 +1,8 @@
 
 import { useEffect, useState } from "react";
 import "./App.css";
+import Login from "./Login";
+import Signup from "./Signup";
 
 const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete"];
 
@@ -9,9 +11,15 @@ function App() {
   const [warehouses, setWarehouses] = useState([]);
 
 
+  const [token, setToken] = useState("");
+  const [signingUp, setSigningUp] = useState(false);
+
+
   useEffect(() => {
-    loadRecords();
+    // loadRecords();
   }, [])
+
+  //Tedt
 
 
   async function loadRecords() {
@@ -33,32 +41,36 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <h1>Database Manager</h1>
-        <p>Manage your database records</p>
-      </header>
-
-      <nav className="tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            className={`tab ${activeTab === tab ? "active" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </button>
-        ))}
-      </nav>
-
-      <main className="content">
-        {activeTab === "Warehouses" && <ReadPanel warehouses={warehouses} onRefresh={loadRecords}/>}
-        {activeTab === "Warehouse Search" && <SearchPanel warehouses={warehouses} />}
-        {activeTab === "Insert" && <InsertPanel onRefresh={loadRecords}/>}
-        {activeTab === "Update" && <UpdatePanel onRefresh={loadRecords}/>}
-        {activeTab === "Delete" && <DeletePanel warehouses={warehouses} onRefresh={loadRecords}/>}
-      </main>
+    <div>
+      {token === "" && !signingUp && <Signup />}
+      
     </div>
+    // <div className="app">
+    //   <header className="header">
+    //     <h1>Database Manager</h1>
+    //     <p>Manage your database records</p>
+    //   </header>
+
+    //   <nav className="tabs">
+    //     {tabs.map((tab) => (
+    //       <button
+    //         key={tab}
+    //         className={`tab ${activeTab === tab ? "active" : ""}`}
+    //         onClick={() => setActiveTab(tab)}
+    //       >
+    //         {tab}
+    //       </button>
+    //     ))}
+    //   </nav>
+
+    //   <main className="content">
+    //     {activeTab === "Warehouses" && <ReadPanel warehouses={warehouses} onRefresh={loadRecords}/>}
+    //     {activeTab === "Warehouse Search" && <SearchPanel warehouses={warehouses} />}
+    //     {activeTab === "Insert" && <InsertPanel onRefresh={loadRecords}/>}
+    //     {activeTab === "Update" && <UpdatePanel onRefresh={loadRecords}/>}
+    //     {activeTab === "Delete" && <DeletePanel warehouses={warehouses} onRefresh={loadRecords}/>}
+    //   </main>
+    // </div>
   );
 }
 
@@ -120,7 +132,7 @@ function SearchPanel({warehouses}) {
 
       const uriQuery = encodeURIComponent(query);
       const url = `http://localhost:8000/search?name=${uriQuery}`;
-      console.log(url);
+      // console.log(url);
       const response = await fetch(url);
 
       if (!response.ok) {
