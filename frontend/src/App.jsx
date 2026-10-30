@@ -4,28 +4,49 @@ import "./App.css";
 import Login from "./Login";
 import Signup from "./Signup";
 
-const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete"];
+// Add insert, update, and delete back later.
+const tabs = ["Warehouses", "Warehouse Search"];
 
 function App() {
-  const [activeTab, setActiveTab] = useState("Warehouses");
-  const [warehouses, setWarehouses] = useState([]);
 
 
   const [token, setToken] = useState("");
   const [signingUp, setSigningUp] = useState(false);
 
+  console.log("App rendered. Token:", token);
+
+  return (
+    <div>
+      {!token && !signingUp && <Login setToken={setToken} setSigningUp={setSigningUp} />}
+      {!token && signingUp && <Signup setSigningUp={setSigningUp}/>}
+      {token && <Main token={token} />}
+    </div>
+    
+  );
+}
+
+function Main({token}) {
+
+  console.log("TEST")
+  const [activeTab, setActiveTab] = useState("Warehouses");
+  const [warehouses, setWarehouses] = useState([]);
 
   useEffect(() => {
-    // loadRecords();
+    loadRecords();
   }, [])
-
-  //Tedt
-
 
   async function loadRecords() {
     try {
       const response = await fetch(
-        "http://localhost:8000/read"
+        "http://localhost:8000/read", 
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+        
       );
 
       if (!response.ok) {
@@ -39,39 +60,32 @@ function App() {
       console.log(err);
     }
   }
-
   return (
-    <div>
-      {token === "" && !signingUp && <Signup />}
-      
-    </div>
-    // <div className="app">
-    //   <header className="header">
-    //     <h1>Database Manager</h1>
-    //     <p>Manage your database records</p>
-    //   </header>
+  <div className="app">
+      <header className="header">
+        <h1>Database Manager</h1>
+        <p>Manage your database records</p>
+      </header>
 
-    //   <nav className="tabs">
-    //     {tabs.map((tab) => (
-    //       <button
-    //         key={tab}
-    //         className={`tab ${activeTab === tab ? "active" : ""}`}
-    //         onClick={() => setActiveTab(tab)}
-    //       >
-    //         {tab}
-    //       </button>
-    //     ))}
-    //   </nav>
-
-    //   <main className="content">
-    //     {activeTab === "Warehouses" && <ReadPanel warehouses={warehouses} onRefresh={loadRecords}/>}
-    //     {activeTab === "Warehouse Search" && <SearchPanel warehouses={warehouses} />}
-    //     {activeTab === "Insert" && <InsertPanel onRefresh={loadRecords}/>}
-    //     {activeTab === "Update" && <UpdatePanel onRefresh={loadRecords}/>}
-    //     {activeTab === "Delete" && <DeletePanel warehouses={warehouses} onRefresh={loadRecords}/>}
-    //   </main>
-    // </div>
-  );
+      <nav className="tabs">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={`tab ${activeTab === tab ? "active" : ""}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </nav>
+      <main className="content">
+        {activeTab === "Warehouses" && <ReadPanel warehouses={warehouses} onRefresh={loadRecords}/>}
+        {activeTab === "Warehouse Search" && <SearchPanel token={token} warehouses={warehouses} />}
+        {/* {activeTab === "Insert" && <InsertPanel onRefresh={loadRecords}/>}
+        {activeTab === "Update" && <UpdatePanel onRefresh={loadRecords}/>}
+        {activeTab === "Delete" && <DeletePanel warehouses={warehouses} onRefresh={loadRecords}/>} */}
+      </main>
+    </div>)
 }
 
 // TODO: Make these separate files
@@ -116,7 +130,7 @@ function ReadPanel({warehouses, onRefresh}) {
   );
 }
 
-function SearchPanel({warehouses}) {
+function SearchPanel({token, warehouses}) {
 
   const [warehouseData, setWarehouseData] = useState([]);
   const [query, setQuery] = useState("");
@@ -132,8 +146,16 @@ function SearchPanel({warehouses}) {
 
       const uriQuery = encodeURIComponent(query);
       const url = `http://localhost:8000/search?name=${uriQuery}`;
-      // console.log(url);
-      const response = await fetch(url);
+      console.log(url);
+      const response = await fetch(url,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
@@ -145,7 +167,6 @@ function SearchPanel({warehouses}) {
 
       for (const [key, value] of Object.entries(rawData.Items)) {
         if (value === null) continue;
-
         data.push({
           name: key,
           ids: value.toString(),

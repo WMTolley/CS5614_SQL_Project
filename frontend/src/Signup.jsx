@@ -1,17 +1,19 @@
 import { useState } from "react";
 
-export default function Signup ({onSignup}) {
+export default function Signup ({setSigningUp}) {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
+
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
     
 
-  async function loadWarehouse() {
+  async function signUp() {
     try {
 
       const url = `http://localhost:8000/auth/signup`;
@@ -33,12 +35,15 @@ export default function Signup ({onSignup}) {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
+        setError(response.detail)
+        return;
       }
 
       
       const rawData = await response.json();
       console.log(rawData);
+
+      setMessage(response.message)
       
     } catch (err) {
       console.log(err);
@@ -48,6 +53,7 @@ export default function Signup ({onSignup}) {
   function handleSubmit(event) {
     event.preventDefault();
     setError("");
+    setMessage("");
     
     if (!email || !password) {
       setError("Please enter required fields.");
@@ -55,7 +61,11 @@ export default function Signup ({onSignup}) {
     }
 
     // Connect your real authentication service here.
-    loadWarehouse();
+    signUp();
+  }
+
+  function onLogIn() {
+    setSigningUp(false);
   }
 
   return (
@@ -109,10 +119,14 @@ export default function Signup ({onSignup}) {
           required
         />
 
-        {error && <p role="alert">{error}</p>}
+        
 
         <button type="submit">Log in</button>
       </form>
+      {message && <p className="success"role="alert">{message}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
+      <p>Already have an account?</p>
+      <button onClick={() => onLogIn()} >Create Account</button>
     </div>
   );
 

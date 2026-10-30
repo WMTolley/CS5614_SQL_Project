@@ -1,22 +1,46 @@
 
 import { useState } from "react";
 
-export default function Login({ onLogin, onSignup }) {
-  const [email, setEmail] = useState("");
+export default function Login({ setToken, setSigningUp }) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  async function onLogin() {
+    const url = `http://localhost:8000/auth/login`
+
+    const body = {
+      username: username,
+      password: password
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    console.log(data)
+    setToken(data.token)
+  }
+  
   function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    if (!username || !password) {
       setError("Please enter your email and password.");
       return;
     }
-
     // Connect your real authentication service here.
-    onLogin({ email, password });
+    onLogin();
+
+  }
+
+  function onRegister() {
+    setSigningUp(true);
   }
 
   return (
@@ -25,12 +49,12 @@ export default function Login({ onLogin, onSignup }) {
         <h1>Welcome back</h1>
         <p>Sign in to your account</p>
 
-        <label htmlFor="email">Email</label>
+        <label htmlFor="username">Username</label>
         <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          id="text"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
 
@@ -45,8 +69,9 @@ export default function Login({ onLogin, onSignup }) {
 
         {error && <p role="alert">{error}</p>}
 
-        <button type="submit">Log in</button>
+        <button type="submit">Log In</button>
       </form>
+      <button onClick={() => onRegister()} type="submit">Create an Account</button>
     </div>
   );
 }
