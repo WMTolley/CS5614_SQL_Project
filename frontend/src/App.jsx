@@ -4,8 +4,7 @@ import "./App.css";
 import Login from "./Login";
 import Signup from "./Signup";
 
-// Add insert, update, and delete back later.
-const tabs = ["Warehouses", "Warehouse Search"];
+const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete"];
 
 function App() {
 
@@ -81,9 +80,9 @@ function Main({token}) {
       <main className="content">
         {activeTab === "Warehouses" && <ReadPanel warehouses={warehouses} onRefresh={loadRecords}/>}
         {activeTab === "Warehouse Search" && <SearchPanel token={token} warehouses={warehouses} />}
-        {/* {activeTab === "Insert" && <InsertPanel onRefresh={loadRecords}/>}
-        {activeTab === "Update" && <UpdatePanel onRefresh={loadRecords}/>}
-        {activeTab === "Delete" && <DeletePanel warehouses={warehouses} onRefresh={loadRecords}/>} */}
+        {activeTab === "Insert" && <InsertPanel token={token} onRefresh={loadRecords}/>}
+        {activeTab === "Update" && <UpdatePanel token={token} onRefresh={loadRecords}/>}
+        {activeTab === "Delete" && <DeletePanel token={token} warehouses={warehouses} onRefresh={loadRecords}/>}
       </main>
     </div>)
 }
@@ -227,7 +226,7 @@ function SearchPanel({token, warehouses}) {
   );
 }
 
-function InsertPanel({onRefresh}) {
+function InsertPanel({token, onRefresh}) {
 
   const [itemName, setItemName] = useState("");
   const [itemSerial, setItemSerial] = useState("");
@@ -242,9 +241,21 @@ function InsertPanel({onRefresh}) {
       const uriName = encodeURIComponent(itemName);
       const uriSerial = encodeURIComponent(itemSerial);
 
-      const url = `http://localhost:8000/insert/${uriName}/${uriSerial}`;
+      const url = `http://localhost:8000/insert`;
 
-      const response = await fetch(url);
+      const body = {
+        name: itemName,
+        serial_number: itemSerial,
+      }
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
 
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
@@ -262,12 +273,20 @@ function InsertPanel({onRefresh}) {
   async function addWarehouse() {
     try {
 
-      console.log(itemName);
       const uriName = encodeURIComponent(warehouseName);
 
-      const url = `http://localhost:8000/insert_warehouse/${uriName}`;
+      const url = `http://localhost:8000/insert_warehouse`;
 
-      const response = await fetch(url);
+      const body = {
+        name: warehouseName
+      }
+
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)})
 
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
@@ -312,7 +331,7 @@ function InsertPanel({onRefresh}) {
   );
 }
 
-function UpdatePanel({onRefresh}) {
+function UpdatePanel({token, onRefresh}) {
 
   const [warehouseID, setWarehouseID] = useState("")
   const [privacy, setPrivacy] = useState("")
@@ -322,11 +341,20 @@ function UpdatePanel({onRefresh}) {
     try {
 
       const uriID = encodeURIComponent(warehouseID);
-      const uriPrivacy = encodeURIComponent(privacy === "public")
 
-      const url = `http://localhost:8000/update_warehouse/${uriID}/${uriPrivacy}`;
+      const url = `http://localhost:8000/update_warehouse/${uriID}`;
 
-      const response = await fetch(url);
+      const body = {
+        privacy: (privacy === "public")
+      }
+
+      const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)})
 
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
@@ -370,7 +398,7 @@ function UpdatePanel({onRefresh}) {
   );
 }
 
-function DeletePanel({warehouses, onRefresh}) {
+function DeletePanel({token, warehouses, onRefresh}) {
 
   const [warehouseID, setWarehouseID] = useState("");
   const [message, setMessage] = useState("");
@@ -383,7 +411,13 @@ function DeletePanel({warehouses, onRefresh}) {
 
       const url = `http://localhost:8000/delete/${uriID}`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+      })
 
       if (!response.ok) {
         setMessage("Cannot delete warehouse with items.");
