@@ -495,12 +495,20 @@ function DeletePanel({token, warehouses, onRefresh}) {
 
 
 function AdminSignupPanel({token}) {
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [employeeId, setEmployeeId] = useState("")
+
   async function createEmployeeAccount() {
     try {
       const url = `http://localhost:8000/admin/users`
 
       const body = {
-
+        username: username,
+        password: password,
+        employee_id: employeeId,
+        is_admin: false,
+        customer_id: null // perhaps change later
       };
       const response = await fetch(url, {
       method: 'POST',
@@ -521,8 +529,31 @@ function AdminSignupPanel({token}) {
       <h2>Create User Account</h2>
       <p>Create an account for an existing employee.</p>
       <form onSubmit={(e) => e.preventDefault()}>
-      <label htmlFor="delete-id">Record ID</label>
-
+        <label htmlFor="username">Username</label>
+        <input
+          id="text"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <label htmlFor="id">Username</label>
+        <input
+          id="text"
+          type="text"
+          value={employeeId}
+          onChange={(e) => setEmployeeId(e.target.value)}
+          required
+        />
+      
       <button type="submit">
         Delete Record
       </button>
