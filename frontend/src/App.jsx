@@ -15,6 +15,7 @@ function App() {
 
   console.log("App rendered. Token:", token);
 
+
   return (
     <div>
       {!token && !signingUp && <Login setToken={setToken} setSigningUp={setSigningUp} setLevel={setLevel}/>}
@@ -47,13 +48,23 @@ function accessTabs(level) {
 
 function Main({token, level}) {
 
-  console.log("TEST")
-  const [activeTab, setActiveTab] = useState("Warehouses");
+  const [activeTab, setActiveTab] = useState("");
   const [warehouses, setWarehouses] = useState([]);
 
   useEffect(() => {
-    loadRecords();
+    if (activeTab == "") {
+      setFirstTab();
+    }
+    if (level !== -1) {
+      loadRecords();
+    }
+
   }, [])
+
+  function setFirstTab() {
+    const tabs = accessTabs(level);
+    setActiveTab(tabs[0])
+  }
 
   async function loadRecords() {
     try {
@@ -104,6 +115,7 @@ function Main({token, level}) {
         {activeTab === "Insert" && <InsertPanel token={token} onRefresh={loadRecords}/>}
         {activeTab === "Update" && <UpdatePanel token={token} onRefresh={loadRecords}/>}
         {activeTab === "Delete" && <DeletePanel token={token} warehouses={warehouses} onRefresh={loadRecords}/>}
+        {activeTab === "Admin Signup" && <AdminSignupPanel token={token} />}
       </main>
     </div>)
 }
@@ -488,7 +500,7 @@ function AdminSignupPanel({token}) {
       const url = `http://localhost:8000/admin/users`
 
       const body = {
-        
+
       };
       const response = await fetch(url, {
       method: 'POST',
@@ -503,5 +515,20 @@ function AdminSignupPanel({token}) {
       console.log(err);
     }
   }
+
+  return (
+    <section>
+      <h2>Create User Account</h2>
+      <p>Create an account for an existing employee.</p>
+      <form onSubmit={(e) => e.preventDefault()}>
+      <label htmlFor="delete-id">Record ID</label>
+
+      <button type="submit">
+        Delete Record
+      </button>
+    </form>
+    </section>
+  )
 }
+
 export default App;
