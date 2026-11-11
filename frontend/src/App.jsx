@@ -4,8 +4,8 @@ import "./App.css";
 import Login from "./Login";
 import Signup from "./Signup";
 
-const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete", "Admin Signup"];
-const permissions = [1, 1, 3, 4, 4, -1]
+const tabs = ["Warehouses", "Warehouse Search", "Insert", "Insert Warehouse", "Update", "Delete", "Admin Signup"];
+const permissions = [1, 1, 3, 4, 4, 4, -1]
 function App() {
 
 
@@ -112,7 +112,8 @@ function Main({token, level}) {
       <main className="content">
         {activeTab === "Warehouses" && <ReadPanel warehouses={warehouses} onRefresh={loadRecords}/>}
         {activeTab === "Warehouse Search" && <SearchPanel token={token} warehouses={warehouses} />}
-        {activeTab === "Insert" && <InsertPanel token={token} onRefresh={loadRecords}/>}
+        {activeTab === "Insert" && <InsertPanel token={token} warehouses={warehouses} onRefresh={loadRecords}/>}
+        {activeTab === "Insert Warehouse" && <AddWarehousePanel token={token} onRefresh={loadRecords} />}
         {activeTab === "Update" && <UpdatePanel token={token} onRefresh={loadRecords}/>}
         {activeTab === "Delete" && <DeletePanel token={token} warehouses={warehouses} onRefresh={loadRecords}/>}
         {activeTab === "Admin Signup" && <AdminSignupPanel token={token} />}
@@ -259,26 +260,25 @@ function SearchPanel({token, warehouses}) {
   );
 }
 
-function InsertPanel({token, onRefresh}) {
+function InsertPanel({token, warehouses, onRefresh}) {
 
   const [itemName, setItemName] = useState("");
   const [itemSerial, setItemSerial] = useState("");
+  const [itemWarehouse, setItemWarehouse] = useState(1);
 
-  const [warehouseName, setWarehouseName] = useState("");
   const [message, setMessage] = useState("")
 
   async function addItem() {
     try {
 
       console.log(itemName);
-      const uriName = encodeURIComponent(itemName);
-      const uriSerial = encodeURIComponent(itemSerial);
 
       const url = `http://localhost:8000/insert`;
 
       const body = {
         name: itemName,
         serial_number: itemSerial,
+        warehouse_id: itemWarehouse
       }
 
       const response = await fetch(url, {
@@ -303,11 +303,46 @@ function InsertPanel({token, onRefresh}) {
     }
   }
 
-  async function addWarehouse() {
+
+  return (
+    <section>
+      <h2>Insert Item</h2>
+      <p>Add a new item to the specified warehouse.</p>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <label htmlFor="new-name" >Item Name</label>
+        <input id="new-name" type="text" placeholder="Enter name" onChange={(e) => setItemName(e.target.value)}/>
+
+        <label htmlFor="new-serial">Serial Number</label>
+        <input id="new-serial" type="text" placeholder="Enter serial number" onChange={(e) => setItemSerial(e.target.value)}/>
+
+        <label htmlFor="new-id">Warehouse</label>
+        <label>
+          Select warehouse:
+          <select 
+            value={itemWarehouse} 
+            onChange={(e) => setItemWarehouse(e.target.value)}
+          >
+            <option value="" disabled>Select...</option>
+            {warehouses.map((warehouse) => (
+              <option value={warehouse[0]}>{warehouse[1]}</option>
+            ))}
+          </select>
+        </label>
+
+        <button type="submit" onClick={() => addItem()}>Insert Item</button>
+      </form>
+      {message}
+    </section>
+  );
+}
+
+function AddWarehousePanel({token, onRefresh}) {
+  
+  const [warehouseName, setWarehouseName] = useState("");
+  const [message, setMessage] = useState("");
+
+    async function addWarehouse() {
     try {
-
-      const uriName = encodeURIComponent(warehouseName);
-
       const url = `http://localhost:8000/insert_warehouse`;
 
       const body = {
@@ -317,6 +352,7 @@ function InsertPanel({token, onRefresh}) {
       const response = await fetch(url, {
       method: 'POST',
       headers: {
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify(body)})
@@ -339,18 +375,6 @@ function InsertPanel({token, onRefresh}) {
 
   return (
     <section>
-      <h2>Insert Item</h2>
-      <p>Add a new item to warehouse 1.</p>
-      <form onSubmit={(e) => e.preventDefault()}>
-        <label htmlFor="new-name" >Item Name</label>
-        <input id="new-name" type="text" placeholder="Enter name" onChange={(e) => setItemName(e.target.value)}/>
-
-        <label htmlFor="new-serial">Serial Number</label>
-        <input id="new-serial" type="text" placeholder="Enter serial number" onChange={(e) => setItemSerial(e.target.value)}/>
-
-        <button type="submit" onClick={() => addItem()}>Insert Item</button>
-      </form>
-
       <h2>Insert Warehouse</h2>
       <p>Add a new blank warehouse.</p>
       <form onSubmit={(e) => e.preventDefault()}>
@@ -361,7 +385,7 @@ function InsertPanel({token, onRefresh}) {
       </form>
       {message}
     </section>
-  );
+  )
 }
 
 function UpdatePanel({token, onRefresh}) {
@@ -430,6 +454,7 @@ function UpdatePanel({token, onRefresh}) {
     </section>
   );
 }
+
 
 function DeletePanel({token, warehouses, onRefresh}) {
 
