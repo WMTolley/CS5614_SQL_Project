@@ -4,8 +4,8 @@ import "./App.css";
 import Login from "./Login";
 import Signup from "./Signup";
 
-const tabs = ["Warehouses", "Warehouse Search", "Insert", "Insert Warehouse", "Update", "Delete", "Admin Signup"];
-const permissions = [1, 1, 3, 4, 4, 4, -1]
+const tabs = ["Warehouses", "Warehouse Search", "Insert", "Insert Warehouse", "Update", "Delete", "Reset Password", "Admin Signup"];
+const permissions = [1, 1, 3, 4, 4, 4, 1, -1]
 function App() {
 
 
@@ -20,7 +20,7 @@ function App() {
     <div>
       {!token && !signingUp && <Login setToken={setToken} setSigningUp={setSigningUp} setLevel={setLevel}/>}
       {!token && signingUp && <Signup setSigningUp={setSigningUp}/>}
-      {token && <Main token={token} level={level}/>}
+      {token && <Main token={token} level={level} setToken={setToken}/>}
     </div>
     
   );
@@ -46,7 +46,7 @@ function accessTabs(level) {
   return filteredTabs;
 }
 
-function Main({token, level}) {
+function Main({token, level, setToken}) {
 
   const [activeTab, setActiveTab] = useState("");
   const [warehouses, setWarehouses] = useState([]);
@@ -91,6 +91,21 @@ function Main({token, level}) {
       console.log(err);
     }
   }
+
+  async function logout() {
+    const response = await fetch(
+      "http://localhost:8000/auth/logout", 
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    
+    setToken("")
+  }
   return (
   <div className="app">
       <header className="header">
@@ -116,8 +131,10 @@ function Main({token, level}) {
         {activeTab === "Insert Warehouse" && <AddWarehousePanel token={token} onRefresh={loadRecords} />}
         {activeTab === "Update" && <UpdatePanel token={token} onRefresh={loadRecords}/>}
         {activeTab === "Delete" && <DeletePanel token={token} warehouses={warehouses} onRefresh={loadRecords}/>}
+        {activeTab === "Reset Password" && <ResetPasswordPanel token={token}/>}
         {activeTab === "Admin Signup" && <AdminSignupPanel token={token} />}
       </main>
+      <button onClick={() => logout()}>Log Out</button>
     </div>)
 }
 
@@ -518,11 +535,72 @@ function DeletePanel({token, warehouses, onRefresh}) {
   );
 }
 
+function ResetPasswordPanel({token}) {
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  async function resetPassword() {
+    try {
+      const url = `http://localhost:8000/auth/change-password`;
+
+      const body = {
+        old_password: oldPassword,
+        new_password: newPassword
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      })
+
+      const rawData = await response.json();
+      console.log(rawData);
+
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
+
+  return (
+    <section>
+      <h2>Update Password</h2>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <label htmlFor="oldPassword">Old Password</label>
+        <input
+          id="oldPassword"
+          type="text"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+          required
+        />
+        <label htmlFor="password">New Password</label>
+        <input
+          id="newPassword"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+      
+      <button type="submit" onClick={() => resetPassword()}>
+        Change Password
+      </button>
+    </form>
+    </section>
+  )
+}
 
 function AdminSignupPanel({token}) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [employeeId, setEmployeeId] = useState("")
+
+  const [message, setMessage] = useState("")
 
   async function createEmployeeAccount() {
     try {
@@ -544,7 +622,16 @@ function AdminSignupPanel({token}) {
       },
       body: JSON.stringify(body)
       })
-
+      
+      if (!response.ok) {
+        setMessage("Could not create account.");
+        return;
+      }
+      
+      const rawData = await response.json();
+      console.log(rawData);
+      const newMessage = 'User created with ID ' + rawData.user_id;
+      setMessage(newMessage);
 
     }
     catch (err) {
@@ -573,7 +660,7 @@ function AdminSignupPanel({token}) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <label htmlFor="id">Username</label>
+        <label htmlFor="id">Employee ID</label>
         <input
           id="text"
           type="text"
@@ -583,11 +670,11 @@ function AdminSignupPanel({token}) {
         />
       
       <button type="submit" onClick={() => createEmployeeAccount()}>
-        Delete Record
+        Create Account
       </button>
     </form>
+    {message}
     </section>
   )
 }
-
 export default App;
