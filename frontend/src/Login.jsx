@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 
-export default function Login({ setToken, setSigningUp }) {
+export default function Login({ setToken, setSigningUp, setLevel }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,6 +23,18 @@ export default function Login({ setToken, setSigningUp }) {
     });
     const data = await response.json();
     console.log(data)
+    console.log(data.user.role)
+    switch (data.user.role) {
+      case "Admin": {
+        setLevel(-1);
+        break;
+      }
+      default: {
+        setLevel(0);
+        break;
+      }
+    }
+
     setToken(data.token)
   }
   

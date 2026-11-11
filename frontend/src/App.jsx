@@ -4,27 +4,48 @@ import "./App.css";
 import Login from "./Login";
 import Signup from "./Signup";
 
-const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete"];
-
+const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete", "Admin Signup"];
+const permissions = [0, 0, 1, 2, 3, -1]
 function App() {
 
 
   const [token, setToken] = useState("");
+  const [level, setLevel] = useState(-2); // -1 for admin, positive numbers for employees.
   const [signingUp, setSigningUp] = useState(false);
 
   console.log("App rendered. Token:", token);
 
   return (
     <div>
-      {!token && !signingUp && <Login setToken={setToken} setSigningUp={setSigningUp} />}
+      {!token && !signingUp && <Login setToken={setToken} setSigningUp={setSigningUp} setLevel={setLevel}/>}
       {!token && signingUp && <Signup setSigningUp={setSigningUp}/>}
-      {token && <Main token={token} />}
+      {token && <Main token={token} level={level}/>}
     </div>
     
   );
 }
 
-function Main({token}) {
+function access(index, level) {
+  const permission = permissions[index]
+  if (level === -1) {
+    return permission === -1;
+  }
+  return permission <= level && permission >= 0;
+
+}
+
+function accessTabs(level) {
+  console.log(level)
+  const filteredTabs = tabs.filter((element, index, array) => {
+    const acc = access(index, level);
+    console.log(acc)
+    return acc;
+  })
+
+  return filteredTabs;
+}
+
+function Main({token, level}) {
 
   console.log("TEST")
   const [activeTab, setActiveTab] = useState("Warehouses");
@@ -67,7 +88,7 @@ function Main({token}) {
       </header>
 
       <nav className="tabs">
-        {tabs.map((tab) => (
+        {accessTabs(level).map((tab) => (
           <button
             key={tab}
             className={`tab ${activeTab === tab ? "active" : ""}`}
@@ -460,4 +481,27 @@ function DeletePanel({token, warehouses, onRefresh}) {
   );
 }
 
+
+function AdminSignupPanel({token}) {
+  async function createEmployeeAccount() {
+    try {
+      const url = `http://localhost:8000/admin/users`
+
+      const body = {
+        
+      };
+      const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+      })
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
+}
 export default App;
