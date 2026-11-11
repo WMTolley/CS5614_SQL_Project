@@ -29,8 +29,20 @@ export default function Login({ setToken, setSigningUp, setLevel }) {
         setLevel(-1);
         break;
       }
+      case "InventoryManager": {
+        setLevel(4);
+        break;
+      }
+      case "Supervisor": {
+        setLevel(3);
+        break;
+      }
+      case "WarehouseStaff": {
+        setLevel(2);
+        break;
+      }
       default: {
-        setLevel(0);
+        setLevel(1);
         break;
       }
     }

@@ -5,7 +5,7 @@ import Login from "./Login";
 import Signup from "./Signup";
 
 const tabs = ["Warehouses", "Warehouse Search", "Insert", "Update", "Delete", "Admin Signup"];
-const permissions = [0, 0, 1, 2, 3, -1]
+const permissions = [1, 1, 3, 4, 4, -1]
 function App() {
 
 
@@ -510,6 +510,7 @@ function AdminSignupPanel({token}) {
         is_admin: false,
         customer_id: null // perhaps change later
       };
+
       const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -518,6 +519,8 @@ function AdminSignupPanel({token}) {
       },
       body: JSON.stringify(body)
       })
+
+
     }
     catch (err) {
       console.log(err);
@@ -554,7 +557,7 @@ function AdminSignupPanel({token}) {
           required
         />
       
-      <button type="submit">
+      <button type="submit" onClick={() => createEmployeeAccount()}>
         Delete Record
       </button>
     </form>
