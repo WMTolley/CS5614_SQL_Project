@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS supplier (
 
 CREATE TABLE IF NOT EXISTS customer (
     customer_id SERIAL PRIMARY KEY,
+    hashed_password VARCHAR(50) DEFAULT NULL,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) CONSTRAINT customer_email_format CHECK (email LIKE '_%@_%'),
     phone VARCHAR(20),

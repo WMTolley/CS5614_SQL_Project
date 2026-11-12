@@ -4,6 +4,8 @@ from datetime import datetime
 
 import psycopg2
 
+# Same write permissions as the customer's write permissions
+
 
 def write_order_item(
     conn, warehouse_id, name, serial_number, markup_price, category_id, employee_id
