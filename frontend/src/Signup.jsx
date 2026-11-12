@@ -44,6 +44,7 @@ export default function Signup ({setSigningUp}) {
       console.log(rawData);
 
       setMessage(response.message)
+      setSigningUp(false);
       
     } catch (err) {
       console.log(err);
@@ -121,12 +122,12 @@ export default function Signup ({setSigningUp}) {
 
         
 
-        <button type="submit">Log in</button>
+        <button type="submit">Register</button>
       </form>
       {message && <p className="success"role="alert">{message}</p>}
       {error && <p className="error" role="alert">{error}</p>}
       <p>Already have an account?</p>
-      <button onClick={() => onLogIn()} >Create Account</button>
+      <button onClick={() => onLogIn()} >Log In</button>
     </div>
   );
 

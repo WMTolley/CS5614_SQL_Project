@@ -448,13 +448,13 @@ function UpdatePanel({token, onRefresh}) {
   return (
     <section>
       <h2>Update Warehouse Privacy</h2>
-      <p>Modify an existing record.</p>
+      <p>Set warehouse to private or public.</p>
       <form onSubmit={(e) => e.preventDefault()}>
         <label htmlFor="update-id">Warehouse ID</label>
         <input id="update-id" type="number" placeholder="Enter record ID" onChange={(e) => setWarehouseID(e.target.value)}/>
 
         <label>
-          Select warehouse:
+          Privacy:  
           <select 
             value={privacy} 
             onChange={(e) => setPrivacy(e.target.value)}
