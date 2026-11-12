@@ -96,7 +96,7 @@ function Main({token, level, setToken}) {
     const response = await fetch(
       "http://localhost:8000/auth/logout", 
       {
-        method: "GET",
+        method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -573,7 +573,7 @@ function ResetPasswordPanel({token}) {
         <label htmlFor="oldPassword">Old Password</label>
         <input
           id="oldPassword"
-          type="text"
+          type="password"
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
           required
