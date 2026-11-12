@@ -53,9 +53,9 @@ INSERT INTO customer (name, email) VALUES
 -------------------------------------------------------------------------------
 -- Alaska Station (Warehouse 2): 3 supervisors, 10 staff
 INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id, employee_type) VALUES
-(1, 'Alaska Super 1', 'alsuper1@company.com', 2, NULL, 'WarehouseStaff'),
-(2, 'Alaska Super 2', 'alsuper2@company.com', 2, 1, 'WarehouseStaff'),
-(3, 'Alaska Super 3', 'alsuper3@company.com', 2, 1, 'WarehouseStaff'),
+(1, 'Alaska Super 1', 'alsuper1@company.com', 2, NULL, 'Supervisor'),
+(2, 'Alaska Super 2', 'alsuper2@company.com', 2, 1, 'Supervisor'),
+(3, 'Alaska Super 3', 'alsuper3@company.com', 2, 1, 'Supervisor'),
 (4, 'Alaska Staff 1', 'alstaff1@company.com', 2, 2, 'WarehouseStaff'),
 (5, 'Alaska Staff 2', 'alstaff2@company.com', 2, 2, 'WarehouseStaff'),
 (6, 'Alaska Staff 3', 'alstaff3@company.com', 2, 2, 'WarehouseStaff'),
@@ -69,8 +69,8 @@ INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id
 
 -- Big Ben (Warehouse 3): 1 super of 1 super of 6 staff
 INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id, employee_type) VALUES
-(14, 'Big Ben Tier 1 Super', 'bb_s1@company.com', 3, NULL, 'WarehouseStaff'),
-(15, 'Big Ben Tier 2 Super', 'bb_s2@company.com', 3, 14, 'WarehouseStaff'),
+(14, 'Big Ben Tier 1 Super', 'bb_s1@company.com', 3, NULL, 'Supervisor'),
+(15, 'Big Ben Tier 2 Super', 'bb_s2@company.com', 3, 14, 'Supervisor'),
 (16, 'Big Ben Staff 1', 'bb_st1@company.com', 3, 15, 'WarehouseStaff'),
 (17, 'Big Ben Staff 2', 'bb_st2@company.com', 3, 15, 'WarehouseStaff'),
 (18, 'Big Ben Staff 3', 'bb_st3@company.com', 3, 15, 'WarehouseStaff'),
@@ -80,11 +80,11 @@ INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id
 
 -- Antarctica Ace (Warehouse 4): 5-deep supervisor chain
 INSERT INTO employee (employee_id, name, email, home_warehouse_id, supervisor_id, employee_type) VALUES
-(22, 'Antarctica Level 1', 'ant1@company.com', 4, NULL, 'WarehouseStaff'),
-(23, 'Antarctica Level 2', 'ant2@company.com', 4, 22, 'WarehouseStaff'),
-(24, 'Antarctica Level 3', 'ant3@company.com', 4, 23, 'WarehouseStaff'),
-(25, 'Antarctica Level 4', 'ant4@company.com', 4, 24, 'WarehouseStaff'),
-(26, 'Antarctica Level 5', 'ant5@company.com', 4, 25, 'WarehouseStaff'),
+(22, 'Antarctica Level 1', 'ant1@company.com', 4, NULL, 'Supervisor'),
+(23, 'Antarctica Level 2', 'ant2@company.com', 4, 22, 'Supervisor'),
+(24, 'Antarctica Level 3', 'ant3@company.com', 4, 23, 'Supervisor'),
+(25, 'Antarctica Level 4', 'ant4@company.com', 4, 24, 'Supervisor'),
+(26, 'Antarctica Level 5', 'ant5@company.com', 4, 25, 'Supervisor'),
 (27, 'Antarctica End Worker', 'ant6@company.com', 4, 26, 'WarehouseStaff');
 
 -- Promote to structural sub-tables

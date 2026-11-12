@@ -2,6 +2,8 @@
 -- Rebuild from scratch:  psql -f Data/schema.sql -f Data/seed.sql
 
 -- Clears Database
+DROP TABLE IF EXISTS userSession CASCADE;
+DROP TABLE IF EXISTS userAccount CASCADE;
 DROP TABLE IF EXISTS zipCode CASCADE;
 DROP TABLE IF EXISTS warehouse CASCADE;
 DROP TABLE IF EXISTS itemCategory CASCADE;
@@ -61,7 +63,6 @@ CREATE TABLE IF NOT EXISTS customer (
 -- Supertype of warehouseStaff, supervisor and inventoryManager (discriminator: employee_type)
 CREATE TABLE IF NOT EXISTS employee (
     employee_id SERIAL PRIMARY KEY,
-    hashed_password VARCHAR(50) DEFAULT NULL,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) CONSTRAINT employee_email_format CHECK (email LIKE '_%@_%'),
     phone VARCHAR(20),
@@ -77,7 +78,9 @@ CREATE TABLE IF NOT EXISTS employee (
     -- An employee can't leave before they were hired
     CONSTRAINT employee_dates_in_order CHECK (final_date IS NULL OR final_date >= hire_date),
     -- An employee can't supervise themselves
-    CONSTRAINT employee_not_own_supervisor CHECK (supervisor_id <> employee_id)
+    CONSTRAINT employee_not_own_supervisor CHECK (supervisor_id <> employee_id),
+    -- Lets the subtype tables reference (employee_id, employee_type) together
+    CONSTRAINT employee_id_type_unique UNIQUE (employee_id, employee_type)
 );
 
 -- Item lifecycle: Ordered -> Delivered -> In Stock -> Reserved/Unavailable/Discarded
@@ -145,20 +148,34 @@ CREATE TABLE IF NOT EXISTS warehouseTransfer (
         CHECK (origin_warehouse_id <> destination_warehouse_id)
 );
 
--- Employee subtypes
+-- Employee subtypes. Each one repeats the discriminator as a constant and references
+-- (employee_id, employee_type), so a row can only exist for an employee of that type.
 CREATE TABLE IF NOT EXISTS warehouseStaff (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role_type VARCHAR(30) NOT NULL
+    employee_id INT NOT NULL PRIMARY KEY,
+    employee_type VARCHAR(20) DEFAULT 'WarehouseStaff' NOT NULL
+        CONSTRAINT warehouse_staff_type CHECK (employee_type = 'WarehouseStaff'),
+    role_type VARCHAR(30) NOT NULL,
+    CONSTRAINT warehouse_staff_is_employee_of_type
+        FOREIGN KEY (employee_id, employee_type)
+        REFERENCES employee(employee_id, employee_type) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS supervisor (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role_type VARCHAR(30) NOT NULL
+    employee_id INT NOT NULL PRIMARY KEY,
+    employee_type VARCHAR(20) DEFAULT 'Supervisor' NOT NULL
+        CONSTRAINT supervisor_type CHECK (employee_type = 'Supervisor'),
+    CONSTRAINT supervisor_is_employee_of_type
+        FOREIGN KEY (employee_id, employee_type)
+        REFERENCES employee(employee_id, employee_type) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS inventoryManager (
-    employee_id INT NOT NULL PRIMARY KEY REFERENCES employee(employee_id) ON DELETE CASCADE,
-    role_type VARCHAR(30) NOT NULL
+    employee_id INT NOT NULL PRIMARY KEY,
+    employee_type VARCHAR(20) DEFAULT 'InventoryManager' NOT NULL
+        CONSTRAINT inventory_manager_type CHECK (employee_type = 'InventoryManager'),
+    CONSTRAINT inventory_manager_is_employee_of_type
+        FOREIGN KEY (employee_id, employee_type)
+        REFERENCES employee(employee_id, employee_type) ON DELETE CASCADE
 );
 
 -- Which inventory managers manage which warehouses (M:N)
@@ -166,4 +183,34 @@ CREATE TABLE IF NOT EXISTS management (
     employee_id INT NOT NULL REFERENCES inventoryManager(employee_id) ON DELETE CASCADE,
     warehouse_id INT NOT NULL REFERENCES warehouse(warehouse_id) ON DELETE CASCADE,
     PRIMARY KEY (employee_id, warehouse_id)
+);
+
+-- Login credentials. An account is either the admin (no profile) or linked to exactly one
+-- customer or employee. An employee's permissions come from employee.employee_type.
+CREATE TABLE IF NOT EXISTS userAccount (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE NOT NULL,
+    customer_id INT UNIQUE REFERENCES customer(customer_id) ON DELETE CASCADE,
+    employee_id INT UNIQUE REFERENCES employee(employee_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    -- Admins have no profile; everyone else is exactly one of customer or employee
+    CONSTRAINT account_profile_valid CHECK (
+        (is_admin AND customer_id IS NULL AND employee_id IS NULL)
+        OR (NOT is_admin AND num_nonnulls(customer_id, employee_id) = 1)
+    )
+);
+
+-- Usernames are case-insensitive
+CREATE UNIQUE INDEX IF NOT EXISTS userAccount_username_lower
+    ON userAccount (lower(username));
+
+-- Server-side login sessions; only a hash of the token is stored. Logout deletes the row.
+CREATE TABLE IF NOT EXISTS userSession (
+    token_hash VARCHAR(64) PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES userAccount(user_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    CONSTRAINT session_expires_after_created CHECK (expires_at > created_at)
 );
