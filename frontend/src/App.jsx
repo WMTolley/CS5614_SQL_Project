@@ -419,7 +419,7 @@ function UpdatePanel({token, onRefresh}) {
       const url = `http://localhost:8000/update_warehouse/${uriID}`;
 
       const body = {
-        privacy: (privacy === "public")
+        is_public: (privacy === "public")
       }
 
       const response = await fetch(url, {
@@ -516,7 +516,7 @@ function DeletePanel({token, warehouses, onRefresh}) {
       <h2>Delete Warehouse</h2>
       <p>Remove an empty warehouse from the database.</p>
       <form onSubmit={(e) => e.preventDefault()}>
-        <label htmlFor="delete-id">Record ID</label>
+        <label htmlFor="delete-id">Warehouse</label>
           <select 
             value={warehouseID} 
             onChange={(e) => setWarehouseID(e.target.value)}
